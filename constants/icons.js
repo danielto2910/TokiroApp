@@ -11,7 +11,9 @@ import logout from "../assets/icons/logout.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
-
+import task from "../assets/icons/task.png"
+import paw from "../assets/icons/paw.png"
+import medal from "../assets/icons/medal.png"
 export default {
   play,
   bookmark,
@@ -26,4 +28,7 @@ export default {
   logout,
   eyeHide,
   eye,
+  task,
+  paw,
+  medal
 };

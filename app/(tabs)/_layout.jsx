@@ -24,10 +24,10 @@ const TabLayout = () => {
     <>
         <Tabs screenOptions={{
             tabBarShowLabel: false,
-            tabBarActiveTintColor: '#65eb8b',
-            tabBarInactiveTintColor: '#CDCDE0',
+            tabBarActiveTintColor: '#b9dbb3',
+            tabBarInactiveTintColor: '#a0a7a4',
             tabBarStyle:{
-                backgroundColor:"#1f1f1f", 
+                backgroundColor:"#151515", 
                 borderTopWidth: 1,
                 borderTopColor: "#232533",
                 height: 85,
@@ -57,7 +57,7 @@ const TabLayout = () => {
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
-                            icon={icons.menu}
+                            icon={icons.task}
                             color={color}
                             name="Task"
                             focused={focused}
