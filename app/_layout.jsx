@@ -19,6 +19,8 @@ export default function App() {
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
+    "BubbleGarden": require("../assets/fonts/BubbleGarden.ttf"),
+    "BubbleGardenBold": require("../assets/fonts/BubbleGardenBold.ttf")
   })
 
   useEffect(() => {

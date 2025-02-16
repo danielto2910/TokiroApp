@@ -9,7 +9,7 @@ module.exports = {
         secondary: {
           DEFAULT: "#FF9C01",
           100: "#FF9001",
-          200: "#FF8E01",
+          200: "#48d492",
         },
         black: {
           DEFAULT: "#000",
@@ -30,6 +30,8 @@ module.exports = {
         pbold: ["Poppins-Bold", "sans-serif"],
         pextrabold: ["Poppins-ExtraBold", "sans-serif"],
         pblack: ["Poppins-Black", "sans-serif"],
+        bGarden: ["BubbleGarden", "sans-serif"],
+        bGardenBold: ["BubbleGardenBold", "sans-serif"],
       },
     },
   },
