@@ -3,7 +3,7 @@ import React from 'react'
 
 const Home = () => {
   return (
-    <View className="flex-1 bg-green-200 p-4 gap-3">
+    <View className="flex-1 bg-primary p-4 gap-3">
             {/* Companion Section */}
             <View className="items-center mb-4">
                 

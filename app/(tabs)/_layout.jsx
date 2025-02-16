@@ -30,7 +30,7 @@ const TabLayout = () => {
                 backgroundColor:"#1f1f1f", 
                 borderTopWidth: 1,
                 borderTopColor: "#232533",
-                height: 84,
+                height: 85,
             }
         }}>
             <Tabs.Screen
