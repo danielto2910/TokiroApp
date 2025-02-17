@@ -10,9 +10,12 @@ module.exports = {
           DEFAULT: "#FF9C01",
           100: "#1e1e1e",
           200: "#C8EBBC ",
-          300: "#644c11",
-          400: "#EAFBCA",
-          500: "#d1e1b6"
+          300: "#A7D397",
+          400: "#eeefc2",
+          500: "#fefff7",
+          600: "#e9e4bf",
+          700: "#e4c68b"
+
         },
         black: {
           DEFAULT: "#000",

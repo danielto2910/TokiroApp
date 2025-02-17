@@ -9,9 +9,9 @@ const FormField = ({title, value, placeholder, handleChangeText, otherStyles, ..
     <View className = {`space-y-2 ${otherStyles}`}>
       <Text className= "text-base text-secondary-200 font-psemibold">{title}</Text>
 
-      <View className=" border-2 border-secondary-300 rounded-2xl w-full h-16 px-4 mt-2 bg-secondary-100 focus:border-secondary-200 items-center flex-row">
+      <View className=" border-2 border-secondary-700 rounded-2xl w-full h-16 px-4 mt-2 bg-secondary-400 focus:border-secondary-200 items-center flex-row">
         <TextInput 
-            className="flex-1 text-white font-psemibold text-base"
+            className="flex-1 text-black font-psemibold text-base"
             value={value}
             placeholder={placeholder}
             placeholderTextColor="#292929"

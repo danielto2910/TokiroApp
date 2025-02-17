@@ -20,15 +20,15 @@ export default function HomeDashboard() {
       {/* Username Section */}
       <View className="justify-center min-h-[5vh] px-4">
         <Text className="text-primary text-4xl font-bGarden">
-          Welcome, <Text className="text-secondary-300 font-bGardenBold">Username</Text>!
+          Welcome, <Text className="text-primary font-bGardenBold">Username</Text>!
         </Text>
       </View>
 
       {/* Toggle Switch */}
       <View className="flex-row justify-between px-5 min-h-[15vh] mt-6">
-        <View className="border-2 border-secondary-300 w-full h-60 bg-secondary-400 rounded-3xl  items-center">
+        <View className="border-2 border-secondary-700 w-full h-60 bg-secondary-400 rounded-3xl  items-center">
           {/* Toggle Buttons */}
-          <View className="flex-row bg-secondary-500 rounded-xl w-48 p-1">
+          <View className="flex-row bg-secondary-600 rounded-full w-48 p-1">
             {/* Daily Button */}
             <TouchableOpacity
               onPress={() => setIsDaily(true)}
@@ -36,7 +36,7 @@ export default function HomeDashboard() {
                 isDaily ? "bg-secondary-300" : ""
               }`}
             >
-              <Text className={`font-bGarden ${isDaily ? "text-black" : "text-white"}`}>
+              <Text className={`font-bGarden ${isDaily ? "text-white" : "text-black"}`}>
                 Daily
               </Text>
             </TouchableOpacity>
@@ -48,7 +48,7 @@ export default function HomeDashboard() {
                 !isDaily ? "bg-secondary-300" : ""
               }`}
             >
-              <Text className={`font-bGarden ${!isDaily ? "text-black" : "text-white"}`}>
+              <Text className={`font-bGarden ${!isDaily ? "text-white" : "text-black"}`}>
                 Weekly
               </Text>
             </TouchableOpacity>
