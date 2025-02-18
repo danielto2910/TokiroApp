@@ -14,6 +14,7 @@ import play from "../assets/icons/play.png";
 import task from "../assets/icons/task.png"
 import paw from "../assets/icons/paw.png"
 import medal from "../assets/icons/medal.png"
+import shop from "../assets/icons/shop.jpg"
 export default {
   play,
   bookmark,
@@ -30,5 +31,6 @@ export default {
   eye,
   task,
   paw,
-  medal
+  medal,
+  shop
 };

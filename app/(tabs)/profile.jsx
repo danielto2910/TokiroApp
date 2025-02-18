@@ -4,6 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '../../constants'; // Assuming you have profile images in constants
 import { icons } from '../../constants'; // Assuming you have icons for buttons
 const Profile = () => {
+  const exp = 60; // Current EXP
+  const maxExp = 140; // Max EXP for the level
+  const progress = (exp / maxExp) * 100; // Calculate percentage for progress bar
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
       {/* Profile Section */}
@@ -15,6 +18,15 @@ const Profile = () => {
         />
         <Text className="text-primary text-3xl font-bGarden">Username</Text>
         <Text className="text-white text-lg font-bGarden mt-2">email@example.com</Text>
+
+        <View className="w-full px-10 mt-4">
+          <View className="w-full h-4 bg-secondary-500 rounded-full mt-2">
+            <View
+              className="h-4 bg-secondary-300 rounded-full"
+              style={{ width: `${progress}%` }} // Dynamic width based on EXP
+            />
+          </View>
+        </View>
       </View>
 
       {/* Settings & Logout Section */}
