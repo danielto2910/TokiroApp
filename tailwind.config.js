@@ -5,11 +5,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#161622",
+        primary: "#333333",
         secondary: {
           DEFAULT: "#FF9C01",
-          100: "#FF9001",
-          200: "#FF8E01",
+          100: "#1e1e1e",
+          200: "#C8EBBC ",
+          300: "#A7D397",
+          400: "#eeefc2",
+          500: "#fefff7",
+          600: "#e9e4bf",
+          700: "#e4c68b"
+
         },
         black: {
           DEFAULT: "#000",
@@ -30,6 +36,8 @@ module.exports = {
         pbold: ["Poppins-Bold", "sans-serif"],
         pextrabold: ["Poppins-ExtraBold", "sans-serif"],
         pblack: ["Poppins-Black", "sans-serif"],
+        bGarden: ["BubbleGarden", "sans-serif"],
+        bGardenBold: ["BubbleGardenBold", "sans-serif"],
       },
     },
   },
