@@ -1,9 +1,18 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native'
-
+import { useState } from 'react';
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EventButton from '../../components/EventButton';
+import Create from './create';
+
 const Task = () => {
+  const [events, setEvents] = useState([]); // State to store created events
+
+  const addEvent = (event) => {
+    // Add the new event to the events state
+    console.log('Event Added:', event);
+    setEvents((prevEvents) => [...prevEvents, event]);
+  };
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
       <ScrollView >
@@ -12,8 +21,7 @@ const Task = () => {
       <View className="h-60">  
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           <View className="flex-row px-4 gap-x-4">
-            <EventButton />
-            <EventButton />
+           {/* make the event here */}
           </View>
         </ScrollView>
       </View>
@@ -36,13 +44,13 @@ const Task = () => {
       <View className="px-3">
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex-row px-4 gap-x-4">
-              <EventButton />
+              <EventButton name="something"/>
               <EventButton />
             </View>
           </ScrollView>
       </View>
       </ScrollView>
-      
+      <Create onAddEvent={addEvent} />
     </SafeAreaView>
     
   )
