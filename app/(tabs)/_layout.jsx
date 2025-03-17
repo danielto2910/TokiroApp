@@ -4,7 +4,7 @@ import { icons } from '../../constants'
 import React, { useRef , useState} from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import Create from './create';
 
 const TabIcon = ({icon, color, name, focused})=> {
     const { height } = useWindowDimensions();
@@ -23,20 +23,13 @@ const TabIcon = ({icon, color, name, focused})=> {
 }
 
 const TabLayout = () => {
-    const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);  // State to control BottomSheet visibility
-    const bottomSheetRef = useRef(null);
+    
+    const createRef = useRef(null);
 
-    const handleOpen = () => {
-        setBottomSheetVisible(true);  // Show the BottomSheet
-        bottomSheetRef.current?.expand();  // Optionally expand the BottomSheet
+    const handleOpenCreate = () => {
+        createRef.current?.open(); // ✅ Open the bottom sheet from Create.jsx
     };
-
-    const handleClose = () => {
-        setBottomSheetVisible(false);  // Hide the BottomSheet
-        bottomSheetRef.current?.close();  // Optionally close the BottomSheet
-    };
-
-  return (
+    return (
     <>
      <GestureHandlerRootView style={styles.container}>
             <Tabs screenOptions={{
@@ -45,8 +38,7 @@ const TabLayout = () => {
                 tabBarInactiveTintColor: '#a0a7a4',
                 tabBarStyle:{
                     backgroundColor:"#151515", 
-                    borderTopWidth: 1,
-                    borderTopColor: "#232533",
+
                     height: 85,
                 }
             }}>
@@ -87,21 +79,17 @@ const TabLayout = () => {
                 />
                 
                 <Tabs.Screen
-                    name='create'
-                    options={{
-                        title: 'Create',
-                        headerShown: false,
-                        tabBarIcon: ({ color, focused }) => (
-                            <TabIcon
-                                icon={icons.plus}
-                                color={color}
-                                name="Create"
-                                focused={focused}
-
-                            />
-                        ),
-                        tabBarButton: (props) => <TouchableOpacity {...props} onPress={handleOpen}/>
-                    }}
+                name="create"
+                options={{
+                    title: 'Create',
+                    headerShown: false,
+                    tabBarIcon: ({ color, focused }) => (
+                    <TabIcon icon={icons.plus} color={color} name="Create" focused={focused} />
+                    ),
+                    tabBarButton: (props) => (
+                    <TouchableOpacity {...props} onPress={handleOpenCreate} />
+                    ),
+                }}
                 />
 
                 <Tabs.Screen
@@ -140,20 +128,8 @@ const TabLayout = () => {
             </Tabs>
 
             {/* 🔹 Bottom Sheet Component */}
-            
-            {isBottomSheetVisible && (
-                    <BottomSheet 
-                        ref={bottomSheetRef} 
-                        enablePanDownToClose={true}
-                        snapPoints={[650]}
-                    >
-                        <BottomSheetView style={styles.contentContainer}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>
-                                Create Something 🎉
-                            </Text>
-                        </BottomSheetView>
-                    </BottomSheet>
-                )}
+            <Create ref={createRef} />
+
         </GestureHandlerRootView>
     </>
   )

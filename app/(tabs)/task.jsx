@@ -31,6 +31,16 @@ const Task = () => {
 
         </View>
       </View>
+
+      <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Notes</Text>
+      <View className="px-3">
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <View className="flex-row px-4 gap-x-4">
+              <EventButton />
+              <EventButton />
+            </View>
+          </ScrollView>
+      </View>
       </ScrollView>
       
     </SafeAreaView>
