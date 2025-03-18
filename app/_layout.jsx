@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
+import GlobalProvider from '../context/GlobalProvider'
 import "../global.css"
 
 
@@ -32,11 +33,13 @@ export default function App() {
   if(!fontsLoaded && !error) return null;
 
   return (
-    <Stack>
-        <Stack.Screen name="index" options={{headerShown:false}}/>
-        <Stack.Screen name="(auth)" options={{headerShown:false}}/>
-        <Stack.Screen name="(tabs)" options={{headerShown:false}}/>
-    </Stack>
+    <GlobalProvider>
+      <Stack>
+          <Stack.Screen name="index" options={{headerShown:false}}/>
+          <Stack.Screen name="(auth)" options={{headerShown:false}}/>
+          <Stack.Screen name="(tabs)" options={{headerShown:false}}/>
+      </Stack>
+    </GlobalProvider>
   );
 }
 
