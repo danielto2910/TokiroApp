@@ -1,18 +1,29 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native'
-import { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, } from 'react-native'
+import { useState, useEffect } from 'react';
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EventButton from '../../components/EventButton';
 import Create from './create';
+import { getEvent } from '../../lib/appwrite';
 
 const Task = () => {
-  const [events, setEvents] = useState([]); // State to store created events
+  const [events, setEvents] = useState([]);
 
-  const addEvent = (event) => {
-    // Add the new event to the events state
-    console.log('Event Added:', event);
-    setEvents((prevEvents) => [...prevEvents, event]);
-  };
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const fetchedEvents = await getEvent();
+        console.log("Fetched events data:", fetchedEvents); 
+        setEvents(fetchedEvents);
+        
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
       <ScrollView >
@@ -21,7 +32,18 @@ const Task = () => {
       <View className="h-60">  
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           <View className="flex-row px-4 gap-x-4">
-           {/* make the event here */}
+           {events.map((event) => {
+            console.log("Event data Mapped:", event.event_name);
+            return (
+                <EventButton
+                key={event.$id}
+                name={event.event_name}         
+                location={event.event_location} 
+                description={event.event_description} 
+                />
+              )
+           }
+           )}
           </View>
         </ScrollView>
       </View>
@@ -50,12 +72,10 @@ const Task = () => {
           </ScrollView>
       </View>
       </ScrollView>
-      <Create onAddEvent={addEvent} />
+
     </SafeAreaView>
     
   )
 }
 
 export default Task
-
-const styles = StyleSheet.create({})

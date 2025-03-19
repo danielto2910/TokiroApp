@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Text, TextInput, StyleSheet, View, TouchableOpacity } from 'react-native';
-
+import { createEvent } from '../../lib/appwrite';
 const Create = forwardRef(({ onAddEvent }, ref) => {
   const bottomSheetRef = useRef(null);
   const [text, setText] = useState('');
@@ -16,27 +16,22 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
     close: () => bottomSheetRef.current?.close(),
   }));
 
-  const handleSave = () => {
-    if (onAddEvent && typeof onAddEvent === 'function') {
-      // Create an event object
-      const event = {
-        name: eventName,
-        location,
-        description,
-      };
-
-      // Call the onAddEvent function passed from Task to add the event
-      onAddEvent(event);
-
-      // Reset form fields
-      setEventName('');
-      setLocation('');
-      setDescription('');
-
-      // Close the bottom sheet
-      bottomSheetRef.current?.close();
-    } else {
-      console.error('onAddEvent is not a function!');
+  const handleSave = async () => {
+    try {
+      if (eventName) {
+        const newEvent = await createEvent(eventName, location, description);
+  
+        console.log('Event saved:', newEvent);
+  
+        // Reset fields
+        setEventName('');
+        setLocation('');
+        setDescription('');
+  
+        bottomSheetRef.current?.close();
+      }
+    } catch (error) {
+      console.log('Error saving event:', error);
     }
   };
 

@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import { icons } from "../../constants";
+import { getCurrentUser } from "../../lib/appwrite";
+
+
 
 export default function HomeDashboard() {
   const [isDaily, setIsDaily] = useState(true); // Track selection state
@@ -10,17 +13,35 @@ export default function HomeDashboard() {
   const exp = 60; // Current EXP
   const maxExp = 140; // Max EXP for the level
   const progress = (exp / maxExp) * 100; // Calculate percentage for progress bar
-
+  
   const dailyProgress = 70; // 70% completed for daily tasks
   const weeklyProgress = 40; // 40% completed for weekly tasks
   const taskProgress = isDaily ? dailyProgress : weeklyProgress; // Switches based on selection
+
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    
+    const fetchUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          setUsername(user.username);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
       {/* Username Section */}
       <View className="justify-center min-h-[5vh] px-4">
         <Text className="text-primary text-4xl font-bGarden">
-          Welcome, <Text className="text-primary font-bGardenBold">Username</Text>!
+          Welcome, <Text className="text-primary font-bGardenBold">{username}</Text>!
         </Text>
       </View>
 
@@ -102,3 +123,4 @@ export default function HomeDashboard() {
     </SafeAreaView>
   );
 }
+

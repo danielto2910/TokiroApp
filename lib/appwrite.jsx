@@ -23,7 +23,7 @@ client
     const avatars = new Avatars(client);
     const databases = new Databases(client);
 // Register User
-export const createUser = async (email, password, username) => {
+export const signUp = async (email, password, username) => {
     try{
         const newAccount = await account.create(
             ID.unique(),
@@ -54,9 +54,7 @@ export const createUser = async (email, password, username) => {
         throw new Error(error);
     }
 
-}
-
-
+};
 export const signIn = async (email, password) => {
     try{
         const session = await account.createEmailPasswordSession(email,password);
@@ -64,7 +62,19 @@ export const signIn = async (email, password) => {
     } catch(error){
         throw new Error(error);
     }
-}
+};
+
+export const logout = async () => {
+    console.log("Accessed");
+    try {
+        const session = await account.deleteSession('current');
+        console.log("Logged Out Success");
+        return session;
+    } catch (error){
+        console.log("Error logging out: ",error);
+        
+    }
+};
 
 export const getCurrentUser = async () => {
     try{
@@ -75,7 +85,7 @@ export const getCurrentUser = async () => {
         const currentUser = await databases.listDocuments(
             config.databaseId,
             config.usersCollectionId,
-            [Query.equal]('accountId', currentAccount.$id)
+            [Query.equal('accountId', currentAccount.$id)]
         )
 
         if(!currentUser) throw Error;
@@ -84,4 +94,48 @@ export const getCurrentUser = async () => {
     }catch(error){
         console.log(error)
     }
-}
+};
+
+export const getEvent = async () => {
+    try {
+      const events = await databases.listDocuments(
+        config.databaseId,
+        config.eventsCollectionId
+      );
+  
+      if (!events) throw new Error('No events found');
+      console.log("Fetched events:", events.documents); // Check if this logs the events array
+      return events.documents;
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      throw error;
+    }
+  };
+
+export const createEvent = async (event_name, event_location, event_description) => {
+    try {
+        const currentUser = await account.get()
+        const newEvent = await databases.createDocument(
+        config.databaseId,
+        config.eventsCollectionId,
+        ID.unique(),
+        {
+          event_name,
+          event_location,
+          event_description,
+          users: currentUser.$id
+        }
+      );
+  
+      if (!newEvent) throw Error;
+  
+      console.log('Event created:', newEvent);
+      return newEvent;
+    } catch (error) {
+      console.error('Error creating event:', error);
+      throw error;
+    }
+
+};
+
+export default {databases,account,client}
