@@ -6,6 +6,7 @@ export const config = {
     projectId: '67d89d10001fbf360cf8',
     databaseId: '67d89e870006f56f8d7c',
     eventsCollectionId: '67d89ea6000bd512bf31',
+    notesCollectionId: '67f44bac000869892e2a',
     usersCollectionId: '67d89edc001b52167a90',
     storageId: '67d8a07c001120080489'
 }
@@ -123,7 +124,7 @@ export const createEvent = async (event_name, event_location, event_description)
           event_name,
           event_location,
           event_description,
-          users: currentUser.$id
+          usersId: currentUser.$id
         }
       );
   
@@ -137,5 +138,106 @@ export const createEvent = async (event_name, event_location, event_description)
     }
 
 };
+
+export const getNotes = async () => {
+    try {
+      const notes = await databases.listDocuments(
+        config.databaseId,
+        config.notesCollectionId
+      );
+  
+      return notes.documents;
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+      throw error;
+    }
+};
+
+export const createNote = async (note_title, note_desc) => {
+    try{
+        const currentUser = await account.get()
+        const newNote = await databases.createDocument(
+            config.databaseId,
+            config.notesCollectionId,
+            ID.unique(),
+            {
+                note_title,
+                note_desc,
+                usersId: currentUser.$id
+            }
+        );
+
+        if (!newNote) throw Error;
+        console.log("Created Note: ", newNote)
+
+        return newNote;
+    }catch (error){
+        console.error("Error creating notes: ", error);
+        throw error
+    }
+};
+
+export const updateNote = async (noteId, newTitle, newDesc) => {
+    try {
+
+      console.log('Updating note with ID:', noteId);
+      console.log('New Title:', newTitle);
+      console.log('New Description:', newDesc);
+      const updatedResponse = await databases.updateDocument(
+        config.databaseId, // Replace with your database ID
+        config.notesCollectionId, // Replace with your collection ID
+        noteId, // Use the selected note's $id
+        {
+          note_title: newTitle,
+          note_desc: newDesc,
+        }
+      );
+
+      console.log('Note updated:', noteId);
+      return updatedResponse;
+    } catch (error) {
+      console.error('Error updating note:', error);
+      console.log(noteId)
+      throw error;
+    }
+  };
+
+  export const updateEvent = async (eventId, newName, newLocation, newDesc) => {
+    try {
+      const updatedEvent = await databases.updateDocument(
+        config.databaseId,
+        config.eventsCollectionId,
+        eventId,
+        {
+          event_name: newName,
+          event_location: newLocation,
+          event_description: newDesc,
+        }
+      );
+      console.log("Updated event:", updatedEvent);
+      return updatedEvent;
+    } catch (error) {
+      console.error("Failed to update event:", error);
+      throw error;
+    }
+  };
+
+  export const deleteNote = async (noteId) => {
+    try {
+      await databases.deleteDocument(config.databaseId, config.notesCollectionId, noteId);
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      throw error;
+    }
+  };
+  
+  export const deleteEvent = async (eventId) => {
+    try {
+      await databases.deleteDocument(config.databaseId, config.eventsCollectionId, eventId);
+    } catch (error) {
+      console.error("Failed to delete event:", error);
+      throw error;
+    }
+  };
 
 export default {databases,account,client}
