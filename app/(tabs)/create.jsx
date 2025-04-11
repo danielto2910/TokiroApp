@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Text, TextInput, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { createEvent, createNote } from '../../lib/appwrite';
+
 const Create = forwardRef(({ onAddEvent }, ref) => {
   const bottomSheetRef = useRef(null);
   const [text, setText] = useState('');
@@ -18,36 +18,6 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
     close: () => bottomSheetRef.current?.close(),
   }));
 
-  const handleSave = async () => {
-    try {
-      if (selectedTab === 'events') {
-        if (eventName) {
-          const newEvent = await createEvent(eventName, location, description);
-          console.log('Event saved:', newEvent);
-  
-          // Reset event fields
-          setEventName('');
-          setLocation('');
-          setDescription('');
-          bottomSheetRef.current?.close();
-        }
-      } else if (selectedTab === 'notes') {
-        if (title && text) {
-          const newNote = await createNote(title, text);
-          console.log('Note saved:', newNote);
-  
-          // Reset note fields
-          setTitle('');
-          setText('');
-          bottomSheetRef.current?.close();
-        } else {
-          console.log('Please enter both a title and note text');
-        }
-      }
-    } catch (error) {
-      console.log('Error saving:', error);
-    }
-  };
   return (
     <BottomSheet
       style={styles.bottomSheetContainer}
@@ -132,7 +102,7 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
 
         <View style={{ flex: 1 }} />
         <View style={styles.saveButtonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <TouchableOpacity style={styles.saveButton}>
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </View>

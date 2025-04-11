@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EventButton from '../../components/EventButton';
-import { getEvent, getNotes, updateNote, updateEvent, deleteEvent, deleteNote} from '../../lib/appwrite';
+
 import NoteButton from '../../components/NoteButton';
 
 const Task = () => {
@@ -15,101 +15,6 @@ const Task = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newLocation,setNewLocation] = useState('');
   const [newDesc, setNewDesc] = useState('');
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const fetchedEvents = await getEvent();
-        console.log("Fetched events data:", fetchedEvents); 
-        setEvents(fetchedEvents);
-      } catch (error) {
-        console.error('Failed to fetch events:', error);
-      }
-    };
-
-    const fetchNotes = async () => {
-      try {
-        const fetchedNotes = await getNotes();
-        setNotes(fetchedNotes);
-        
-      } catch (error) {
-        console.error('Failed to fetch notes:', error);
-      }
-    };
-
-    fetchNotes();
-    fetchEvents();
-  }, []);
-
-  const handleNotePress = (noteId) => {
-    const note = notes.find(n => n.$id === noteId);
-    if (note) {
-      setSelectedNote(note);
-      setSelectedEvent(null);
-      setNewTitle(note.note_title);
-      setNewDesc(note.note_desc);
-      setModalVisible(true);
-    }
-  };
-  
-  const handleEventPress = (eventId) => {
-    const event = events.find(e => e.$id === eventId);
-    if (event) {
-      setSelectedEvent(event);
-      setSelectedNote(null);
-      setNewTitle(event.event_name);
-      setNewLocation(event.event_location);
-      setNewDesc(event.event_description);
-      setModalVisible(true);
-    }
-  };
-
-  const handleUpdate = async () => {
-    try {
-      if (selectedNote) {
-        await updateNote(selectedNote.$id, newTitle, newDesc);
-        const updatedNotes = notes.map(note =>
-          note.$id === selectedNote.$id
-            ? { ...note, note_title: newTitle, note_desc: newDesc }
-            : note
-        );
-        setNotes(updatedNotes);
-      } else if (selectedEvent) {
-        await updateEvent(selectedEvent.$id, newTitle, newLocation, newDesc); 
-        const updatedEvents = events.map(event =>
-          event.$id === selectedEvent.$id
-            ? { ...event, event_name: newTitle, event_location: newLocation, event_description: newDesc }
-            : event
-        );
-        setEvents(updatedEvents);
-      }
-  
-      setModalVisible(false);
-      setSelectedNote(null);
-      setSelectedEvent(null);
-    } catch (error) {
-      console.error('Failed to update item:', error);
-    }
-  };
-  const handleDelete = async () => {
-    try {
-      if (selectedNote) {
-        await deleteNote(selectedNote.$id);
-        setNotes(notes.filter(note => note.$id !== selectedNote.$id));
-      } else if (selectedEvent) {
-        await deleteEvent(selectedEvent.$id);
-        setEvents(events.filter(event => event.$id !== selectedEvent.$id));
-      }
-  
-      // Close modal and reset state
-      setModalVisible(false);
-      setSelectedNote(null);
-      setSelectedEvent(null);
-    } catch (error) {
-      console.error('Failed to delete item:', error);
-    }
-  };
-
-
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">

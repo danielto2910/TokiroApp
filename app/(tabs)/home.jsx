@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import { icons } from "../../constants";
-import { getCurrentUser } from "../../lib/appwrite";
 
 
 
@@ -20,21 +19,6 @@ export default function HomeDashboard() {
 
   const [username, setUsername] = useState("");
 
-  useEffect(() => {
-    
-    const fetchUser = async () => {
-      try {
-        const user = await getCurrentUser();
-        if (user) {
-          setUsername(user.username);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">

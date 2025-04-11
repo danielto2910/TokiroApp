@@ -1,25 +1,21 @@
 import React from 'react'
 import { View, Text, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { images } from '../../constants'; // Assuming you have profile images in constants
+
 import { icons } from '../../constants'; // Assuming you have icons for buttons
-import { logout } from '../../lib/appwrite';
-import { useGlobalContext } from '../../context/GlobalProvider';
+import { useAuth } from '../../context/AuthProvider';
 import { router } from 'expo-router';
+
 const Profile = () => {
-
-  const { user, setUser, setIsLoggedIn} = useGlobalContext();
-
-
-  const handleLogOut = async () => {
-    await logout();
-    setUser(null);
-    setIsLoggedIn(false);
-
-    router.replace('/sign-in');
-    
-
-  }
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace('/sign-in'); // 👈 Redirect to sign-in screen
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const exp = 60; // Current EXP
   const maxExp = 140; // Max EXP for the level
@@ -78,7 +74,7 @@ const Profile = () => {
         {/* Logout Button */}
         <TouchableOpacity
           className="mt-4  h-10 w-25 bg-primary rounded-xl items-center justify-center"
-          onPress= {handleLogOut}
+          onPress= {handleLogout}
         >
           <Text className="text-white font-bGarden text-xl">Logout</Text>
         </TouchableOpacity>

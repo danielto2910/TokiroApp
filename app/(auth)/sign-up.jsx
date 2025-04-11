@@ -5,39 +5,23 @@ import {images} from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { Link, router } from 'expo-router'
-import { signUp } from '../../lib/appwrite'
-import { useGlobalContext } from '../../context/GlobalProvider'
+
+
 
 
 const SignUp = () => {
-  const [form, setForm] = useState({
-    username: '',
-    email: '',
-    password: ''
-  })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const {setUser, setIsLogged} = useGlobalContext();
-  const submit = async () => {
-    if(!form.username || !form.email || !form.password){
-      Alert.alert('Error', 'Please fill in all the fields');
-    }
-    setIsSubmitting(true)
-    try{
-      const result = await signUp(form.email,form.password,form.username)
-      
-      // set it to global state
-      // setUser(result);
-      // setIsLogged(true);
-
-      router.replace('/home')
-    }catch(error){
-      Alert.alert('Error', error.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
+ const { SignUp, loading } = useAuth();
+   const [email, setEmail] = useState('');
+   const [password, setPassword] = useState('');
+ 
+   const handleSignUp = async () => {
+     try {
+       await SignUp(email, password);
+       router.replace('/home')
+     } catch (error) {
+       Alert.alert("Login failed", error.message);
+     }
+   };
   return (
     <SafeAreaView className = "bg-primary h-full">
       <ScrollView>
@@ -71,7 +55,7 @@ const SignUp = () => {
         
           <CustomButton
             title="Sign Up"
-            handlePress={submit}
+  
             containerStyles="mt-7"
             textStyles="font-psemibold"
             isLoading={isSubmitting}

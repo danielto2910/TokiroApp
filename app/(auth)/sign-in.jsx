@@ -1,40 +1,42 @@
-import { View, Text , ScrollView, Image, Alert} from 'react-native'
-import React, {useState} from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import {images} from '../../constants'
-import FormField from '../../components/FormField'
-import CustomButton from '../../components/CustomButton'
-import { Link, router } from 'expo-router'
-import { getCurrentUser, signIn } from '../../lib/appwrite'
-import { useGlobalContext } from '../../context/GlobalProvider'
+import React, { useState , useEffect} from 'react';
+import { View, Alert, ScrollView, Text, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../../context/AuthProvider';
+import FormField from '../../components/FormField';
+import CustomButton from '../../components/CustomButton';
+import { router } from 'expo-router';
+import { Link } from 'expo-router';
+import { images } from '../../constants';
+
 
 const SignIn = () => {
-  const [form, setForm] = useState({
-    email: '',
-    password: ''
-  })
+  const { signIn, loading , user} = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const {setUser, setIsLogged} = useGlobalContext();
-  const submit = async () => {
-      if( !form.email || !form.password){
-        Alert.alert('Error', 'Please fill in all the fields');
-      }
-      setIsSubmitting(true)
-      try{
-        await signIn(form.email,form.password)
-        // const result = await getCurrentUser();
-        // set it to global state
-        // setUser(result);
-        // setIsLogged(true);
-  
-        router.replace('/home')
-      }catch(error){
-        Alert.alert('Error', error.message)
-      } finally {
-        setIsSubmitting(false)
-      }
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/home'); // 👈 Immediately navigate to home
     }
+  }, [loading, user]);
+
+  const handleSignIn = async () => {
+    try {
+      await signIn(email, password);
+      router.replace('/home')
+    } catch (error) {
+      Alert.alert("Login failed", error.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-primary">
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView className = "bg-primary h-full">
@@ -48,24 +50,24 @@ const SignIn = () => {
           <Text className= "text-4xl text-secondary-200 text-bold font-bGarden mt-10">Log In to Tokiro</Text>
           <FormField
             title="Email"
-            value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e})}
+            value={email}
+            handleChangeText={setEmail}
             otherStyles="mt-7"
             keyboardType="email-address"
           />
           <FormField
             title="Password"
-            value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e})}
+            value={password}
+            handleChangeText={setPassword}
             otherStyles="mt-7"
           />
-        
+
           <CustomButton
             title="Sign In"
-            handlePress={submit}
             containerStyles="mt-7"
             textStyles="font-psemibold"
-            isLoading={isSubmitting}
+            isLoading={loading}
+            handlePress={handleSignIn}
           />
           <View className = "justify-center pt-5 flex-row gap-2">
             <Text className = "text-lg text-white font-pregular">
