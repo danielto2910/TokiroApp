@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { auth, firestoreDB } from '../lib/firebaseConfig';
 
 const AuthContext = createContext();
@@ -35,12 +35,30 @@ export const AuthProvider = ({ children }) => {
     
   };
 
+  const createEvent = async (eventName, eventDesc, eventLoc) => {
+    const user = auth.currentUser;
+    try{
+      const eventRef = await addDoc(collection(firestoreDB, "events"), {
+        uid: user.uid,
+        name: eventName,
+        description: eventDesc,
+        location: eventLoc,
+        createdAt: new Date().toISOString(),
+      })
+
+      console.log("Event created with ID: ", eventRef.id);
+    }
+    catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout }}>
+    <AuthContext.Provider value={{ user, loading, signIn,createEvent, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );

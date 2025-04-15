@@ -3,18 +3,41 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EventButton from '../../components/EventButton';
-
 import NoteButton from '../../components/NoteButton';
-
+import { auth, firestoreDB } from '../../lib/firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 const Task = () => {
-  const [events, setEvents] = useState([]);
+  const [event, setEvent] = useState({
+    name: '',
+    description: '',
+    location: ''
+  });
+  
+  const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [newTitle, setNewTitle] = useState('');
-  const [newLocation,setNewLocation] = useState('');
-  const [newDesc, setNewDesc] = useState('');
+
+  const fetchUserEvents = async () => {
+    try {
+      const eventsRef = collection(firestoreDB, "events");
+      const querySnapshot = await getDocs(eventsRef); // Get all events
+  
+      const allEvents = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setEvents(allEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserEvents();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
@@ -26,11 +49,11 @@ const Task = () => {
               {events.map((event) => {
                 return (
                   <EventButton
-                    key={event.$id}
-                    name={event.event_name}         
-                    location={event.event_location} 
-                    description={event.event_description} 
-                    onPress={() => handleEventPress(event.$id)}
+                    key={event.id}
+                    name={event.name}         
+                    location={event.location} 
+                    description={event.description} 
+                    onPress={{}}
                   />
                 );
               })}
@@ -59,10 +82,10 @@ const Task = () => {
               {notes.map((note) => {
                 return (
                   <NoteButton
-                    key={note.$id}
-                    name={note.note_title}
-                    description={note.note_desc}
-                    onPress={() => handleNotePress(note.$id)}  // Pass the note's $id to the handler
+                    key={{}}
+                    name={{}}
+                    description={{}}
+                    onPress={{}}  // Pass the note's $id to the handler
                   />
                 );
               })}
@@ -88,29 +111,23 @@ const Task = () => {
               </Text>
 
               <TextInput
-                value={newTitle}
-                onChangeText={setNewTitle}
                 placeholder="Title"
                 className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
               />
  
               { selectedEvent && (
                 <TextInput
-                value={newLocation}
-                onChangeText={setNewLocation}
                 placeholder='Location'
                 className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
               />
               )}
               <TextInput
-                value={newDesc}
-                onChangeText={setNewDesc}
                 placeholder="Description"
                 className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
               />
 
               <View className="flex-row gap-x-4 mt-4">
-                <Button title="Update" onPress={handleUpdate} />
+                <Button title="Update" onPress={{}} />
                 <Button title="Close" onPress={() => {
                   setModalVisible(false);
                   setSelectedNote(null);
@@ -120,7 +137,7 @@ const Task = () => {
                 <Button
                   title="Delete"
                   color="red"
-                  onPress={handleDelete}
+                  onPress={{}}
                 />
               </View>
             </View>

@@ -1,15 +1,16 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Text, TextInput, StyleSheet, View, TouchableOpacity } from 'react-native';
-
+import { useAuth } from '../../context/AuthProvider';
 const Create = forwardRef(({ onAddEvent }, ref) => {
   const bottomSheetRef = useRef(null);
-  const [text, setText] = useState('');
-  const [title, setTitle] = useState('');
-
-  const [eventName, setEventName] = useState('');
-  const [location, setLocation] = useState('');
-  const [description, setDescription] = useState('');
+  const { createEvent } = useAuth();
+  // Single state object for the event
+  const [event, setEvent] = useState({
+    name: '',
+    description: '',
+    location: ''
+  });
 
   const [selectedTab, setSelectedTab] = useState('events');
 
@@ -17,6 +18,37 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
     open: () => bottomSheetRef.current?.expand(),
     close: () => bottomSheetRef.current?.close(),
   }));
+
+  // Handle input change for the event fields
+  const handleInputChange = (field, value) => {
+    setEvent(prevEvent => ({
+      ...prevEvent,
+      [field]: value,
+    }));
+  };
+
+  // Handle saving event
+  const handleSaveEvent = async () => {
+    const { name, description, location } = event;
+    if (!name || !location || !description) {
+      console.log('Please fill all fields');
+      return;
+    }
+
+    try {
+      // Call createEvent from AuthProvider to save event
+      await createEvent(name, description, location);
+
+      // Reset form after saving
+      setEvent({ name: '', description: '', location: '' });
+
+
+      // Close the bottom sheet after saving
+      bottomSheetRef.current?.close();
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
+  };
 
   return (
     <BottomSheet
@@ -57,8 +89,8 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
               <TextInput
                 placeholder="Name of the Event..."
                 style={styles.inputText}
-                value={eventName}
-                onChangeText={setEventName}
+                value={event.name}
+                onChangeText={(value) => handleInputChange('name', value)}  // Use the new input handler
               />
             </View>
             <Text style={styles.eventText}>Location</Text>
@@ -66,8 +98,8 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
               <TextInput
                 placeholder="Where is the event..."
                 style={styles.inputText}
-                value={location}
-                onChangeText={setLocation}
+                value={event.location}
+                onChangeText={(value) => handleInputChange('location', value)}  // Use the new input handler
               />
             </View>
             <Text style={styles.eventText}>Description</Text>
@@ -75,8 +107,8 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
               <TextInput
                 placeholder="Write what the event is about..."
                 style={styles.inputText}
-                value={description}
-                onChangeText={setDescription}
+                value={event.description}
+                onChangeText={(value) => handleInputChange('description', value)}  // Use the new input handler
               />
             </View>
           </View>
@@ -86,14 +118,10 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
           <View>
             <TextInput
               style={[styles.inputTitle]}
-              value={title}
-              onChangeText={setTitle}
               placeholder="Title"
             />
             <TextInput
               style={[styles.inputText]}
-              value={text}
-              onChangeText={setText}
               placeholder="Write your notes here..."
               multiline
             />
@@ -102,9 +130,15 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
 
         <View style={{ flex: 1 }} />
         <View style={styles.saveButtonContainer}>
-          <TouchableOpacity style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+          {/* Only enable Save button if 'events' tab is selected */}
+          {selectedTab === 'events' && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveEvent}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </BottomSheetView>
     </BottomSheet>

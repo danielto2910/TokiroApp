@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import { icons } from "../../constants";
-
-
+import { auth, firestoreDB } from "../../lib/firebaseConfig"; 
+import { doc, getDoc } from "firebase/firestore";
 
 export default function HomeDashboard() {
   const [isDaily, setIsDaily] = useState(true); // Track selection state
@@ -19,6 +19,28 @@ export default function HomeDashboard() {
 
   const [username, setUsername] = useState("");
 
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const docRef = doc(firestoreDB, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+  
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setUsername(userData.username || "Adventurer"); // fallback name
+        } else {
+          console.log("No such user document!");
+        }
+      } catch (error) {
+        console.error("Error fetching username:", error);
+      }
+    };
+  
+    fetchUsername();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
