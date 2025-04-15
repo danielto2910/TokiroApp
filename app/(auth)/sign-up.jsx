@@ -1,27 +1,47 @@
 import { View, Text , ScrollView, Image, Alert} from 'react-native'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {images} from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { Link, router } from 'expo-router'
+import { useAuth } from '../../context/AuthProvider'
 
 
 
 
 const SignUp = () => {
- const { SignUp, loading } = useAuth();
-   const [email, setEmail] = useState('');
-   const [password, setPassword] = useState('');
- 
-   const handleSignUp = async () => {
-     try {
-       await SignUp(email, password);
-       router.replace('/home')
-     } catch (error) {
-       Alert.alert("Login failed", error.message);
-     }
-   };
+  const { signUp, loading, user } = useAuth();
+
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/home');
+    }
+  }, [loading, user]);
+
+  const handleSignUp = async () => {
+    if (!username || !email || !password) {
+      return Alert.alert('Missing Fields', 'Please fill out all fields.');
+    }
+
+    try {
+      await signUp(email, password, username);
+    } catch (error) {
+      Alert.alert('Sign up failed', error.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-primary">
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
   return (
     <SafeAreaView className = "bg-primary h-full">
       <ScrollView>
@@ -34,31 +54,31 @@ const SignUp = () => {
           <Text className= "text-4xl text-secondary-200 text-bold font-bGarden mt-10">Sign Up to Tokiro</Text>
           <FormField
             title="Username"
-            value={form.username}
-            handleChangeText={(e) => setForm({ ...form, username: e})}
+            value={username}
+            handleChangeText={setUsername}
             otherStyles="mt-7"
           />
           
           <FormField
             title="Email"
-            value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e})}
+            value={email}
+            handleChangeText={setEmail}
             otherStyles="mt-7"
             keyboardType="email-address"
           />
           <FormField
             title="Password"
-            value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e})}
+            value={password}
+            handleChangeText={setPassword}
             otherStyles="mt-7"
           />
         
           <CustomButton
             title="Sign Up"
-  
+            handlePress={handleSignUp}
             containerStyles="mt-7"
             textStyles="font-psemibold"
-            isLoading={isSubmitting}
+            isLoading={loading}
           />
           <View className = "justify-center pt-5 flex-row gap-2">
             <Text className = "text-lg text-white font-pregular">

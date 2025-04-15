@@ -17,14 +17,18 @@ const SignIn = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/home'); // 👈 Immediately navigate to home
+      router.replace('/home'); 
     }
   }, [loading, user]);
 
   const handleSignIn = async () => {
+
+    if ( !email || !password) {
+      return Alert.alert('Missing Fields', 'Please fill out all fields.');
+    }
+
     try {
       await signIn(email, password);
-      router.replace('/home')
     } catch (error) {
       Alert.alert("Login failed", error.message);
     }
