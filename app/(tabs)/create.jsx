@@ -4,12 +4,17 @@ import { Text, TextInput, StyleSheet, View, TouchableOpacity } from 'react-nativ
 import { useAuth } from '../../context/AuthProvider';
 const Create = forwardRef(({ onAddEvent }, ref) => {
   const bottomSheetRef = useRef(null);
-  const { createEvent } = useAuth();
+  const { createEvent, createNotes } = useAuth();
   // Single state object for the event
   const [event, setEvent] = useState({
     name: '',
     description: '',
     location: ''
+  });
+
+  const [note, setNote] = useState({
+    title: '',
+    content: '',
   });
 
   const [selectedTab, setSelectedTab] = useState('events');
@@ -23,6 +28,10 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
   const handleInputChange = (field, value) => {
     setEvent(prevEvent => ({
       ...prevEvent,
+      [field]: value,
+    }));
+    setNote(prevNote => ({
+      ...prevNote,
       [field]: value,
     }));
   };
@@ -47,6 +56,27 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
       bottomSheetRef.current?.close();
     } catch (error) {
       console.error('Error creating event:', error);
+    }
+  };
+
+  const handleSaveNote = async () => {
+    const { title, content } = note;
+    if (!title) {
+      console.log('please give it a title');
+      return;
+    }
+
+    try {
+      // Call createEvent from AuthProvider to save event
+      await createNotes(title, content);
+
+      // Reset form after saving
+      setNote({ title: '', content: '' });
+
+      // Close the bottom sheet after saving
+      bottomSheetRef.current?.close();
+    } catch (error) {
+      console.error('Error creating note:', error);
     }
   };
 
@@ -119,11 +149,15 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
             <TextInput
               style={[styles.inputTitle]}
               placeholder="Title"
+              onChangeText={(value) => handleInputChange('title', value)}
+              value={note.title}
             />
             <TextInput
               style={[styles.inputText]}
               placeholder="Write your notes here..."
               multiline
+              onChangeText={(value) => handleInputChange('content', value)}
+              value={note.content}
             />
           </View>
         )}
@@ -135,6 +169,14 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
             <TouchableOpacity
               style={styles.saveButton}
               onPress={handleSaveEvent}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          )}
+          {selectedTab === 'notes' && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveNote}
             >
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>

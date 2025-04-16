@@ -53,12 +53,29 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const createNotes = async (noteTitle, noteContent) => {
+    const user = auth.currentUser;
+    try{
+      const noteRef = await addDoc(collection(firestoreDB, "notes"), {
+        uid: user.uid,
+        title: noteTitle,
+        content: noteContent,
+        createdAt: new Date().toISOString(),
+      })
+
+      console.log("Event created with ID: ", noteRef.id);
+    }
+    catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn,createEvent, signUp, logout }}>
+    <AuthContext.Provider value={{ user, loading, signIn,createEvent, createNotes, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );

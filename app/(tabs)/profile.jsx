@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import YourEventsModal from '../../components/ProfileEventsModal';
 import { icons } from '../../constants'; // Assuming you have icons for buttons
 import { useAuth } from '../../context/AuthProvider';
 import { router } from 'expo-router';
 
 const Profile = () => {
+
+  const [yourEventsModalVisible, setYourEventsModalVisible] = useState(false);
   const { logout } = useAuth();
   const handleLogout = async () => {
     try {
@@ -53,6 +55,13 @@ const Profile = () => {
           <Image source={icons.settings} className="w-6 h-6" />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          className="bg-secondary-400 p-4 rounded-2xl border border-secondary-700"
+          onPress={() => setYourEventsModalVisible(true)}
+        >
+          <Text className="text-black text-lg text-center font-semibold">Your Events</Text>
+        </TouchableOpacity>
+
         {/* Privacy Option */}
         <TouchableOpacity
           className="flex-row justify-between items-center px-6 py-3 border-b-2 rounded-full border-secondary-700"
@@ -79,6 +88,11 @@ const Profile = () => {
           <Text className="text-white font-bGarden text-xl">Logout</Text>
         </TouchableOpacity>
       </View>
+
+      <YourEventsModal
+        visible={yourEventsModalVisible}
+        onClose={() => setYourEventsModalVisible(false)}
+      />
     </SafeAreaView>
   )
 }

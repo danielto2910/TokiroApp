@@ -7,11 +7,7 @@ import NoteButton from '../../components/NoteButton';
 import { auth, firestoreDB } from '../../lib/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 const Task = () => {
-  const [event, setEvent] = useState({
-    name: '',
-    description: '',
-    location: ''
-  });
+
   
   const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
@@ -34,15 +30,47 @@ const Task = () => {
       console.error("Error fetching events:", error);
     }
   };
+
+  const fetchUserNotes = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log("User not authenticated.");
+          return;
+        }
+  
+        // Fetch events created by the current user
+        const notesRef = collection(firestoreDB, "notes");
+        const q = query(notesRef, where("uid", "==", user.uid)); // Ensure uid is in the events
+        const querySnapshot = await getDocs(q);
+        const userNotesData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+    
+        setNotes(userNotesData);
+      } catch (error) {
+        console.error("Error fetching user events:", error);
+      }
+    };
   
   useEffect(() => {
     fetchUserEvents();
+    fetchUserNotes();
   }, []);
+
+  const handleEventPress = (event) => {
+    setSelectedEvent(event);
+  };
+
+  const handleNotePress = (note) => {
+    setSelectedNote(note);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
       <ScrollView>
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Events</Text>
+        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Upcoming Events</Text>
         <View className="h-60">
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex-row px-4 gap-x-4">
@@ -50,10 +78,14 @@ const Task = () => {
                 return (
                   <EventButton
                     key={event.id}
-                    name={event.name}         
-                    location={event.location} 
-                    description={event.description} 
-                    onPress={{}}
+                    name={event.name}
+                    location={event.location}
+                    description={event.description}
+                    onPress={() => {
+                      handleEventPress(event)
+                      setSelectedNote(null); // just in case something was selected before
+                      setModalVisible(true);
+                    }}
                   />
                 );
               })}
@@ -61,19 +93,13 @@ const Task = () => {
           </ScrollView>
         </View>
 
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Daily Tasks</Text>
+        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Your Tasks</Text>
         <View className="px-5">
           <View className="border-2 border-secondary-700 w-full mt-3 h-[220px] bg-secondary-400 rounded-3xl items-center">
             {/* Add task content here */}
           </View>
         </View>
 
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Weekly Tasks</Text>
-        <View className="px-5">
-          <View className="border-2 border-secondary-700 w-full mt-3 h-[220px] bg-secondary-400 rounded-3xl items-center">
-            {/* Add task content here */}
-          </View>
-        </View>
 
         <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Notes</Text>
         <View className="px-3">
@@ -82,16 +108,21 @@ const Task = () => {
               {notes.map((note) => {
                 return (
                   <NoteButton
-                    key={{}}
-                    name={{}}
-                    description={{}}
-                    onPress={{}}  // Pass the note's $id to the handler
+                    key={note.id}
+                    name={note.title}
+                    description={note.content}
+                    onPress={() => {handleNotePress(note);
+                      setModalVisible(true);
+                    }}  // Pass the note's $id to the handler
                   />
                 );
               })}
             </View>
           </ScrollView>
         </View>
+
+
+        
 
         {/* Modal for updating/deleting note */}
         <Modal
@@ -110,35 +141,15 @@ const Task = () => {
                 {selectedNote ? 'Update Note' : selectedEvent ? 'Update Event' : ''}
               </Text>
 
-              <TextInput
-                placeholder="Title"
-                className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
-              />
- 
-              { selectedEvent && (
-                <TextInput
-                placeholder='Location'
-                className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
-              />
-              )}
-              <TextInput
-                placeholder="Description"
-                className="w-full h-10 border border-secondary-700 rounded-lg p-2 mb-3"
-              />
-
+              <Text>{selectedEvent?.name}</Text>
+              <Text>{selectedEvent?.location}</Text>
+              <Text>{selectedEvent?.description}</Text>
               <View className="flex-row gap-x-4 mt-4">
-                <Button title="Update" onPress={{}} />
                 <Button title="Close" onPress={() => {
                   setModalVisible(false);
                   setSelectedNote(null);
                   setSelectedEvent(null);
                 }} />
-
-                <Button
-                  title="Delete"
-                  color="red"
-                  onPress={{}}
-                />
               </View>
             </View>
           </View>
