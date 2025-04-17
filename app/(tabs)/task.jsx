@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, Modal, TextInput, Button } from 'react-native';
+import { Text, View, ScrollView, Modal, TextInput, Button,RefreshControl } from 'react-native';
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,20 +6,30 @@ import EventButton from '../../components/EventButton';
 import NoteButton from '../../components/NoteButton';
 import { auth, firestoreDB } from '../../lib/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useAuth } from '../../context/AuthProvider';
+
 const Task = () => {
 
-  
+  const [refreshing, setRefreshing] = useState(false);
+  const {updateNote, deleteNote} = useAuth()
   const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchUserEvents(), fetchUserNotes()]);
+    setRefreshing(false);
+  };
+  
   const fetchUserEvents = async () => {
     try {
       const eventsRef = collection(firestoreDB, "events");
       const querySnapshot = await getDocs(eventsRef); // Get all events
-  
+      
       const allEvents = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -69,7 +79,10 @@ const Task = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-secondary-200">
-      <ScrollView>
+      <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }>
         <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Upcoming Events</Text>
         <View className="h-60">
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
@@ -140,17 +153,67 @@ const Task = () => {
               <Text className="text-2xl font-bGarden mb-4">
                 {selectedNote ? 'Update Note' : selectedEvent ? 'Update Event' : ''}
               </Text>
+              {selectedNote && (
+              <>
+                <TextInput
+                  value={selectedNote.title}
+                  onChangeText={(text) =>
+                    setSelectedNote((prev) => ({ ...prev, title: text }))
+                  }
+                  className="w-full h-10 border border-gray-400 rounded-lg p-2 mb-2"
+                  placeholder="Note Title"
+                />
+                <TextInput
+                  value={selectedNote.content}
+                  onChangeText={(text) =>
+                    setSelectedNote((prev) => ({ ...prev, content: text }))
+                  }
+                  className="w-full h-20 border border-gray-400 rounded-lg p-2 mb-2"
+                  placeholder="Note Content"
+                  multiline
+                />
 
-              <Text>{selectedEvent?.name}</Text>
-              <Text>{selectedEvent?.location}</Text>
-              <Text>{selectedEvent?.description}</Text>
-              <View className="flex-row gap-x-4 mt-4">
-                <Button title="Close" onPress={() => {
-                  setModalVisible(false);
-                  setSelectedNote(null);
-                  setSelectedEvent(null);
-                }} />
-              </View>
+                <View className="flex-row gap-x-4 mt-4">
+                  <Button title="Update" onPress={() => {
+                    // Call your updateNote function here
+                    updateNote(selectedNote.id, {
+                      title: selectedNote.title,
+                      content: selectedNote.content});
+                    console.log("Update Note:", selectedNote);
+                    setModalVisible(false);
+                    fetchUserNotes();
+                    setSelectedNote(null);
+                  }} />
+                  <Button title="Delete" color="red" onPress={() => {
+                    // Call your deleteNote function here
+                    deleteNote(selectedNote.id);
+                    console.log("Delete Note:", selectedNote.id);
+                    setModalVisible(false);
+                    fetchUserNotes();
+                    setSelectedNote(null);
+                  }} />
+                  <Button title="Close" onPress={() => {
+                    setModalVisible(false);
+                    setSelectedNote(null);
+                  }} />
+                </View>
+              </>
+            )}
+
+            {selectedEvent && (
+              <>
+                <Text className="text-lg font-semibold">{selectedEvent.name}</Text>
+                <Text>{selectedEvent.location}</Text>
+                <Text>{selectedEvent.description}</Text>
+
+                <View className="flex-row gap-x-4 mt-4">
+                  <Button title="Close" onPress={() => {
+                    setModalVisible(false);
+                    setSelectedEvent(null);
+                  }} />
+                </View>
+              </>
+            )}
             </View>
           </View>
         </Modal>
