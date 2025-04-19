@@ -1,19 +1,23 @@
-import { Text, View, ScrollView, Modal, TextInput, Button,RefreshControl } from 'react-native';
+import { Text, View, ScrollView, Modal, TextInput, Button,RefreshControl, Switch} from 'react-native';
+import Checkbox from 'expo-checkbox';
+
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EventButton from '../../components/EventButton';
 import NoteButton from '../../components/NoteButton';
 import { auth, firestoreDB } from '../../lib/firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthProvider';
 
 const Task = () => {
 
   const [refreshing, setRefreshing] = useState(false);
-  const {updateNote, deleteNote} = useAuth()
+  const {updateNote, deleteNote, updateTask} = useAuth();
   const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
+  const [dailyTasks, setDailyTasks] = useState([]);
+  const [weeklyTasks, setWeeklyTasks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -21,7 +25,7 @@ const Task = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUserEvents(), fetchUserNotes()]);
+    await Promise.all([fetchUserEvents(), fetchUserNotes()],fetchUserTask("daily"),fetchUserTask("weekly"));
     setRefreshing(false);
   };
   
@@ -38,6 +42,41 @@ const Task = () => {
       setEvents(allEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
+    }
+  };
+
+  const fetchUserTask = async (taskType) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.log("User not authenticated.");
+        return;
+      }
+  
+      const taskRef = collection(firestoreDB, "tasks");
+  
+      const maxLimit = taskType === "daily" ? 4 : taskType === "weekly" ? 2 : 10;
+  
+      const q = query(
+        taskRef,
+        where("uid", "==", user.uid),
+        where("type", "==", taskType),
+        limit(maxLimit)
+      );
+  
+      const querySnapshot = await getDocs(q);
+      const userTasksData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      if (taskType === "daily") {
+        setDailyTasks(userTasksData);
+      } else if (taskType === "weekly") {
+        setWeeklyTasks(userTasksData);
+      }
+    } catch (error) {
+      console.error("Error fetching user tasks:", error);
     }
   };
 
@@ -67,7 +106,11 @@ const Task = () => {
   useEffect(() => {
     fetchUserEvents();
     fetchUserNotes();
+    fetchUserTask("daily"); // Fetch daily tasks
+    fetchUserTask("weekly"); // Fetch weekly tasks
   }, []);
+
+  
 
   const handleEventPress = (event) => {
     setSelectedEvent(event);
@@ -78,7 +121,7 @@ const Task = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-secondary-200">
+    <SafeAreaView className="flex-1 bg-secondary-200 pb-10">
       <ScrollView
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -108,10 +151,54 @@ const Task = () => {
 
         <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Your Tasks</Text>
         <View className="px-5">
-          <View className="border-2 border-secondary-700 w-full mt-3 h-[220px] bg-secondary-400 rounded-3xl items-center">
-            {/* Add task content here */}
+          {/* Daily Tasks */}
+          {dailyTasks.map(task => (
+          <View
+            key={task.id}
+            className="flex-row items-center justify-between border-2 border-secondary-700 w-full mt-3 h-[60px] bg-secondary-400 rounded-3xl px-4 py-2"
+          >
+            <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
+              {task.taskContent}
+            </Text>
+
+            <Checkbox
+              value={task.finishedState}
+              onValueChange={async (newState) => {
+                await updateTask(task.id, { finishedState: newState });
+                setDailyTasks(prev =>
+                  prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+                );
+              }}
+              color={task.finishedState ? '#4CAF50' : undefined}
+            />
           </View>
+        ))}
+
+          {/* Weekly Tasks */}
+          <Text className="text-4xl text-black font-bGarden mt-3">Weekly Tasks</Text>
+          {weeklyTasks.map(task => (
+          <View
+            key={task.id}
+            className="flex-row items-center justify-between border-2 border-secondary-700 w-full mt-3 h-[60px] bg-secondary-400 rounded-3xl px-4 py-2"
+          >
+            <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
+              {task.taskContent}
+            </Text>
+
+            <Checkbox
+              value={task.finishedState}
+              onValueChange={async (newState) => {
+                await updateTask(task.id, { finishedState: newState });
+                setWeeklyTasks(prev =>
+                  prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+                );
+              }}
+              color={task.finishedState ? '#4CAF50' : undefined}
+            />
+          </View>
+        ))}
         </View>
+
 
 
         <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Notes</Text>
@@ -131,9 +218,9 @@ const Task = () => {
                 );
               })}
             </View>
+            <View className="h-10" />
           </ScrollView>
         </View>
-
 
         
 

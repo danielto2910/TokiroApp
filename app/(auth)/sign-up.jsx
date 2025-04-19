@@ -19,7 +19,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/home');
+      router.replace('/landingPage');
     }
   }, [loading, user]);
 

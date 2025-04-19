@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { addDoc, collection, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc, updateDoc,query, deleteDoc, where, getDocs } from 'firebase/firestore';
 import { auth, firestoreDB } from '../lib/firebaseConfig';
 
 const AuthContext = createContext();
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     
   };
 
-  const createEvent = async (eventName, eventDesc, eventLoc) => {
+  const createEvent = async (eventName, eventDesc, eventLoc, expGained, expAmount) => {
     const user = auth.currentUser;
     try{
       const eventRef = await addDoc(collection(firestoreDB, "events"), {
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
         createdAt: new Date().toISOString(),
       })
 
-      console.log("Event created with ID: ", noteRef.id);
+      console.log("Note created with ID: ", noteRef.id);
     }
     catch (e) {
       console.error("Error adding document: ", e);
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const noteRef = doc(firestoreDB, 'notes', noteId);
       await updateDoc(noteRef, updatedData);
-      console.log('Event updated successfully!');
+      console.log('Notes updated successfully!');
     } catch (error) {
       console.error('Error updating event:', error);
     }
@@ -105,17 +105,73 @@ export const AuthProvider = ({ children }) => {
     try {
       const noteRef = doc(firestoreDB, 'notes', noteId);
       await deleteDoc(noteRef);
-      console.log('Event deleted successfully!');
+      console.log('Notes deleted successfully!');
     } catch (error) {
       console.error('Error deleting event:', error);
     }
   };
+
+  const createTasks = async (taskContent, type, finishedState, expGained, expAmount) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.log("User not authenticated.");
+      return;
+    }
+
+    const typeLimits = {
+      daily: 4,
+      weekly: 2,
+    };
+
+    // Create reference to the "tasks" collection
+    const tasksRef = collection(firestoreDB, "tasks");
+
+    // Query to check how many tasks of this type the user has
+    const q = query(tasksRef, where("uid", "==", user.uid), where("type", "==", type));
+
+    try {
+      // Get documents matching the query
+      const querySnapshot = await getDocs(q);
+
+      // If the user already has the max number of tasks of that type
+      if (querySnapshot.size >= typeLimits[type]) {
+        console.log(`You can only have up to ${typeLimits[type]} ${type} tasks.`);
+        return;
+      }
+
+      // Add the new task to Firestore
+      const taskRef = await addDoc(tasksRef, {
+        uid: user.uid,
+        taskContent: taskContent,
+        type: type,
+        finishedState: finishedState,
+        expGained: expGained, // BooleanCheck
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log("Task created with ID: ", taskRef.id);
+    } catch (e) {
+      console.error("Error adding task document: ", e);
+    }
+  };  
+
+  const updateTask = async (taskId, updatedData) => {
+    try {
+      const taskRef = doc(firestoreDB, 'tasks', taskId);
+      await updateDoc(taskRef, updatedData);
+      console.log('task updated successfully!');
+    } catch (error) {
+      console.error('Error updating event:', error);
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn,createEvent, createNotes, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
+    <AuthContext.Provider value={{ user, loading, signIn,createEvent, createNotes, createTasks, updateTask, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );
