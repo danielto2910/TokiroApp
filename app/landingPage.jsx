@@ -32,7 +32,7 @@ const LandingPage = () => {
       ]);
 
       Alert.alert('Tasks Saved', 'Welcome aboard!');
-      router.replace('/home'); // Replace with main screen, e.g. /home or /tasks
+      router.push('/home'); // Replace with main screen, e.g. /home or /tasks
     } catch (error) {
       console.error('Task submission failed:', error);
     }

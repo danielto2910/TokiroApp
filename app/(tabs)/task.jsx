@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, Modal, TextInput, Button,RefreshControl, Switch} from 'react-native';
+import { Text, View, ScrollView, Modal, TextInput, Button, TouchableOpacity,RefreshControl, Switch} from 'react-native';
 import Checkbox from 'expo-checkbox';
 
 import { useState, useEffect } from 'react';
@@ -21,7 +21,7 @@ const Task = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -149,56 +149,73 @@ const Task = () => {
           </ScrollView>
         </View>
 
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Your Tasks</Text>
-        <View className="px-5">
-          {/* Daily Tasks */}
-          {dailyTasks.map(task => (
-          <View
+        <Text className="text-4xl text-black font-bGarden mt-3 text-left">Daily Tasks</Text>
+        {dailyTasks.map(task => (
+          <TouchableOpacity
             key={task.id}
-            className="flex-row items-center justify-between border-2 border-secondary-700 w-full mt-3 h-[60px] bg-secondary-400 rounded-3xl px-4 py-2"
+            activeOpacity={0.7}
+            onPress={() => {
+              setSelectedTask(task);
+              setSelectedNote(null);
+              setSelectedEvent(null);
+              setModalVisible(true);
+            }}
+            className="mt-3"
           >
-            <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
-              {task.taskContent}
-            </Text>
+            <View className="flex-row items-center justify-between border-2 border-secondary-700 w-full bg-secondary-400 rounded-3xl px-4 py-4">
+              <View className="flex-1 pr-2">
+                <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
+                  {task.taskContent}
+                </Text>
+              </View>
 
-            <Checkbox
-              value={task.finishedState}
-              onValueChange={async (newState) => {
-                await updateTask(task.id, { finishedState: newState });
-                setDailyTasks(prev =>
-                  prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
-                );
-              }}
-              color={task.finishedState ? '#4CAF50' : undefined}
-            />
-          </View>
+              <Checkbox
+                value={task.finishedState}
+                onValueChange={async (newState) => {
+                  await updateTask(task.id, { finishedState: newState });
+                  setDailyTasks(prev =>
+                    prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+                  );
+                }}
+                color={task.finishedState ? '#4CAF50' : undefined}
+              />
+            </View>
+          </TouchableOpacity>
         ))}
-
           {/* Weekly Tasks */}
           <Text className="text-4xl text-black font-bGarden mt-3">Weekly Tasks</Text>
           {weeklyTasks.map(task => (
-          <View
+          <TouchableOpacity
             key={task.id}
-            className="flex-row items-center justify-between border-2 border-secondary-700 w-full mt-3 h-[60px] bg-secondary-400 rounded-3xl px-4 py-2"
+            activeOpacity={0.7}
+            onPress={() => {
+              setSelectedTask(task);
+              setSelectedNote(null);
+              setSelectedEvent(null);
+              setModalVisible(true);
+            }}
+            className="mt-3"
           >
-            <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
-              {task.taskContent}
-            </Text>
+            <View className="flex-row items-center justify-between border-2 border-secondary-700 w-full bg-secondary-400 rounded-3xl px-4 py-4">
+              <View className="flex-1 pr-2">
+                <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
+                  {task.taskContent}
+                </Text>
+              </View>
 
-            <Checkbox
-              value={task.finishedState}
-              onValueChange={async (newState) => {
-                await updateTask(task.id, { finishedState: newState });
-                setWeeklyTasks(prev =>
-                  prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
-                );
-              }}
-              color={task.finishedState ? '#4CAF50' : undefined}
-            />
-          </View>
+              <Checkbox
+                value={task.finishedState}
+                onValueChange={async (newState) => {
+                  await updateTask(task.id, { finishedState: newState });
+                  setDailyTasks(prev =>
+                    prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+                  );
+                }}
+                color={task.finishedState ? '#4CAF50' : undefined}
+              />
+            </View>
+          </TouchableOpacity>
         ))}
-        </View>
-
 
 
         <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Notes</Text>
@@ -286,6 +303,43 @@ const Task = () => {
                 </View>
               </>
             )}
+
+          {selectedTask && (
+            <>
+              <TextInput
+                value={selectedTask.taskContent}
+                onChangeText={(text) =>
+                  setSelectedTask((prev) => ({ ...prev, taskContent: text }))
+                }
+                className="w-full h-20 border border-gray-400 rounded-lg p-2 mb-2"
+                placeholder="Edit Task"
+                multiline
+              />
+
+              <View className="flex-row gap-x-4 mt-4">
+                <Button title="Update" onPress={async () => {
+                  await updateTask(selectedTask.id, { 
+                    taskContent: selectedTask.taskContent,
+                    finishedState: false
+                  });
+                  console.log("Updated Task:", selectedTask);
+
+                  if (selectedTask.type === 'daily') {
+                    fetchUserTask("daily");
+                  } else {
+                    fetchUserTask("weekly");
+                  }
+
+                  setSelectedTask(null);
+                  setModalVisible(false);
+                }} />
+                <Button title="Close" onPress={() => {
+                  setSelectedTask(null);
+                  setModalVisible(false);
+                }} />
+              </View>
+            </>
+          )}
 
             {selectedEvent && (
               <>

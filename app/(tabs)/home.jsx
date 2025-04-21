@@ -4,7 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import { icons } from "../../constants";
 import { auth, firestoreDB } from "../../lib/firebaseConfig"; 
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+
+
 
 export default function HomeDashboard() {
   const [isDaily, setIsDaily] = useState(true); // Track selection state
@@ -18,6 +20,43 @@ export default function HomeDashboard() {
   const taskProgress = isDaily ? dailyProgress : weeklyProgress; // Switches based on selection
 
   const [username, setUsername] = useState("");
+  const [dailyTasks, setDailyTasks] = useState([]);
+  const [weeklyTasks, setWeeklyTasks] = useState([]);
+
+  const fetchUserTask = async (taskType) => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log("User not authenticated.");
+          return;
+        }
+    
+        const taskRef = collection(firestoreDB, "tasks");
+    
+        const maxLimit = taskType === "daily" ? 4 : taskType === "weekly" ? 2 : 10;
+    
+        const q = query(
+          taskRef,
+          where("uid", "==", user.uid),
+          where("type", "==", taskType),
+          limit(maxLimit)
+        );
+    
+        const querySnapshot = await getDocs(q);
+        const userTasksData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+    
+        if (taskType === "daily") {
+          setDailyTasks(userTasksData);
+        } else if (taskType === "weekly") {
+          setWeeklyTasks(userTasksData);
+        }
+      } catch (error) {
+        console.error("Error fetching user tasks:", error);
+      }
+    };
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -38,7 +77,8 @@ export default function HomeDashboard() {
         console.error("Error fetching username:", error);
       }
     };
-  
+    fetchUserTask("daily");
+    fetchUserTask("weekly");
     fetchUsername();
   }, []);
 
@@ -79,8 +119,20 @@ export default function HomeDashboard() {
                 Weekly
               </Text>
             </TouchableOpacity>
-          </View>
 
+            
+          </View>
+          {/* Task List */}
+          <View className="w-full px-6 mt-4 space-y-1">
+            {(isDaily ? dailyTasks : weeklyTasks).map((task, index) => (
+              <View key={task.id || index} className="flex-row items-start">
+                <Text className="text-primary text-base mr-2">•</Text>
+                <Text className="text-primary text-base font-bGarden flex-1">
+                  {task.taskContent}
+                </Text>
+              </View>
+            ))}
+          </View>
 
           {/* Task Progress Bar Inside Toggle Box */}
           <View className="w-full absolute bottom-5 px-4">

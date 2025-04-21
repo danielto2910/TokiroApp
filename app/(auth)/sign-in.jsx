@@ -17,7 +17,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/home'); 
+      router.push('/home'); 
     }
   }, [loading, user]);
 

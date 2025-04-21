@@ -111,50 +111,49 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const createTasks = async (taskContent, type, finishedState, expGained, expAmount) => {
+  const createTasks = async (taskContent, type, finishedState, expGained) => {
     const user = auth.currentUser;
-
+  
     if (!user) {
       console.log("User not authenticated.");
       return;
     }
-
+  
     const typeLimits = {
       daily: 4,
       weekly: 2,
     };
-
-    // Create reference to the "tasks" collection
+  
+    // Set expAmount based on task type
+    const expAmount = type === "daily" ? 20 : type === "weekly" ? 50 : 0;
+  
     const tasksRef = collection(firestoreDB, "tasks");
-
-    // Query to check how many tasks of this type the user has
     const q = query(tasksRef, where("uid", "==", user.uid), where("type", "==", type));
-
+  
     try {
-      // Get documents matching the query
       const querySnapshot = await getDocs(q);
-
-      // If the user already has the max number of tasks of that type
+  
       if (querySnapshot.size >= typeLimits[type]) {
         console.log(`You can only have up to ${typeLimits[type]} ${type} tasks.`);
         return;
       }
-
-      // Add the new task to Firestore
+  
       const taskRef = await addDoc(tasksRef, {
         uid: user.uid,
         taskContent: taskContent,
         type: type,
         finishedState: finishedState,
-        expGained: expGained, // BooleanCheck
+        expGained: expGained, // This can be true/false depending on how you’re using it
+        expAmount: expAmount,
         createdAt: new Date().toISOString(),
       });
-
+  
       console.log("Task created with ID: ", taskRef.id);
     } catch (e) {
       console.error("Error adding task document: ", e);
     }
-  };  
+  };
+  
 
   const updateTask = async (taskId, updatedData) => {
     try {
@@ -166,12 +165,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const createCompanion = async (companionName, imageUrl) => {
+    const user = auth.currentUser;
+  
+    if (!user) {
+      console.log("User not authenticated.");
+      return;
+    }
+  
+    try {
+      const companionRef = await addDoc(collection(firestoreDB, "companions"), {
+        uid: user.uid,
+        name: companionName,
+        imageUrl: imageUrl,
+        level: 1,
+        experience: 0,
+        createdAt: new Date().toISOString(),
+      });
+  
+      console.log("Companion created with ID: ", companionRef.id);
+    } catch (e) {
+      console.error("Error adding companion document: ", e);
+    }
+  };
+
+  const updateCompanion = async (companionId, updatedData) => {
+    try {
+      const companionRef = doc(firestoreDB, 'companions', companionId);
+      await updateDoc(companionRef, updatedData);
+      console.log('Companion updated successfully!');
+    } catch (error) {
+      console.error('Error updating companion:', error);
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn,createEvent, createNotes, createTasks, updateTask, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
+    <AuthContext.Provider value={{ user, createCompanion, updateCompanion, loading, signIn,createEvent, createNotes, createTasks, updateTask, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );

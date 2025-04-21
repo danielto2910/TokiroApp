@@ -19,7 +19,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/landingPage');
+      router.push('/companionSelection');
     }
   }, [loading, user]);
 
