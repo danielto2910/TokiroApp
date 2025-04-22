@@ -5,16 +5,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#333333",
+        primary: "#BFFFC8", // Pastel Green
         secondary: {
-          DEFAULT: "#FF9C01",
-          100: "#1e1e1e",
-          200: "#C8EBBC ",
-          300: "#A7D397",
-          400: "#eeefc2",
-          500: "#fefff7",
-          600: "#e9e4bf",
-          700: "#e4c68b"
+          pastelOrange: "#FFD79B",
+          accentCoral: "#FF9E9E",
+          softCream: "#fff5df",
+          white: "#FFFFFF",
+          softGray: "#F5F5F5",
+          textGreen: "#2D3A22",
+          lighterCream: "#fff5df",
 
         },
         black: {

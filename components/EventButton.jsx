@@ -6,7 +6,7 @@ const EventButton = ({ name, location, description, onPress, finishedState }) =>
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="border-2 border-secondary-700 w-[130px] mt-3 h-[180px] bg-secondary-400 rounded-3xl items-center p-2"
+      className=" w-[130px] mt-3 h-[180px] bg-[#fff9e6] rounded-3xl items-center p-2 shadow-lg"
     >
       {/* Event Name */}
       <Text className="text-lg font-bold text-black text-center">{name}</Text>

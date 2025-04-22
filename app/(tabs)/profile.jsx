@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import YourEventsModal from '../../components/ProfileEventsModal';
@@ -9,7 +9,8 @@ import { router } from 'expo-router';
 const Profile = () => {
 
   const [yourEventsModalVisible, setYourEventsModalVisible] = useState(false);
-  const { logout } = useAuth();
+  const [username, setUsername] = useState("");
+  const { logout, fetchUsername } = useAuth();
   const handleLogout = async () => {
     try {
       await logout();
@@ -18,6 +19,19 @@ const Profile = () => {
       console.error("Logout failed:", error);
     }
   };
+
+  const loadData = async () => {
+   
+    const userName = await fetchUsername();
+    setUsername(userName);
+
+
+  };
+
+  useEffect(() => {
+      loadData();
+    }, []);
+
 
   const exp = 60; // Current EXP
   const maxExp = 140; // Max EXP for the level
@@ -31,8 +45,8 @@ const Profile = () => {
           resizeMode="cover"
           className="w-[100px] h-[100px] rounded-full mb-4 border-2"
         />
-        <Text className="text-primary text-3xl font-bGarden">Username</Text>
-        <Text className="text-white text-lg font-bGarden mt-2">email@example.com</Text>
+        <Text className="text-primary text-3xl font-bGarden">{username}</Text>
+
 
         <View className="w-full px-10 mt-4">
           <View className="w-full h-4 bg-secondary-500 rounded-full mt-2">

@@ -22,6 +22,7 @@ const Task = () => {
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [taskView, setTaskView] = useState('daily');
 
 const handleRefresh = async () => {
     setRefreshing(true);
@@ -57,144 +58,162 @@ const handleRefresh = async () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-secondary-200 pb-10">
+    <SafeAreaView className="flex-1 bg-[#DFF5CC]">
       <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }>
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6">Upcoming Events</Text>
-        <View className="h-60">
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <View className="flex-row px-4 gap-x-4">
-              {events.map((event) => {
-                return (
-                  <EventButton
-                    key={event.id}
-                    name={event.name}
-                    location={event.location}
-                    description={event.description}
-                    finishedState={event.completedBy[user.uid]}
-                    onPress={() => {
-                      handleEventPress(event)
-                      setSelectedNote(null); // just in case something was selected before
-                      setModalVisible(true);
-                    }}
-                  />
-                );
-              })}
-            </View>
-          </ScrollView>
-        </View>
+  refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+  }
+>
 
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left">Daily Tasks</Text>
-        {dailyTasks.map(task => (
-          <TouchableOpacity
-            key={task.id}
-            activeOpacity={0.7}
+  <Text className="text-4xl text-[#204a35] font-bGarden mt-3 text-left px-6">Upcoming Events</Text>
+  <View className="h-60">
+    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+      <View className="flex-row px-4 pb-4 gap-x-4">
+        {events.map((event) => (
+          <EventButton
+            key={event.id}
+            name={event.name}
+            location={event.location}
+            description={event.description}
+            finishedState={event.completedBy[user.uid]}
             onPress={() => {
-              setSelectedTask(task);
+              handleEventPress(event);
               setSelectedNote(null);
-              setSelectedEvent(null);
               setModalVisible(true);
             }}
-            className="mt-3"
-          >
-            <View className="flex-row items-center justify-between border-2 border-secondary-700 w-full bg-secondary-400 rounded-3xl px-4 py-4">
-              <View className="flex-1 pr-2">
-                <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
-                  {task.taskContent}
-                </Text>
-              </View>
-
-              <Checkbox
-                value={task.finishedState}
-                onValueChange={async (newState) => {
-                  await updateTask(task.id, { finishedState: newState });
-                
-                  if (newState === true) {
-                    const companions = await fetchUserCompanions();
-                    if (companions) {
-                      const companion = companions[0];
-                      const newExp = (companion.experience || 0) + task.expAmount; // Adjust EXP logic as needed
-                      await updateCompanion(companion.id, { experience: newExp });
-                    }
-                  }
-                
-                  setDailyTasks(prev =>
-                    prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
-                  );
-                }}
-                color={task.finishedState ? '#4CAF50' : undefined}
-              />
-            </View>
-          </TouchableOpacity>
+          />
         ))}
-          {/* Weekly Tasks */}
-          <Text className="text-4xl text-black font-bGarden mt-3">Weekly Tasks</Text>
-          {weeklyTasks.map(task => (
-          <TouchableOpacity
-            key={task.id}
-            activeOpacity={0.7}
+      </View>
+    </ScrollView>
+  </View>
+
+  <Text className="text-4xl text-[#204a35] font-bGarden mt-3 text-left px-6"> Notes</Text>
+  <View className="px-3">
+    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+      <View className="flex-row px-4 pb-4 gap-x-4">
+        {notes.map((note) => (
+          <NoteButton
+            key={note.id}
+            name={note.title}
+            description={note.content}
             onPress={() => {
-              setSelectedTask(task);
-              setSelectedNote(null);
-              setSelectedEvent(null);
+              handleNotePress(note);
               setModalVisible(true);
             }}
-            className="mt-3"
-          >
-            <View className="flex-row items-center justify-between border-2 border-secondary-700 w-full bg-secondary-400 rounded-3xl px-4 py-4">
-              <View className="flex-1 pr-2">
-                <Text className={task.finishedState ? "line-through text-gray-500" : "text-black"}>
-                  {task.taskContent}
-                </Text>
-              </View>
-
-              <Checkbox
-                value={task.finishedState}
-                onValueChange={async (newState) => {
-                  await updateTask(task.id, { finishedState: newState });
-                
-                  if (newState === true) {
-                    const companions = await fetchUserCompanions();
-                    if (companions) {
-                      const companion = companions[0];
-                      const newExp = (companion.experience || 0) + task.expAmount; // Adjust EXP logic as needed
-                      await updateCompanion(companion.id, { experience: newExp });
-                    }
-                  }
-                
-                  setWeeklyTasks(prev =>
-                    prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
-                  );
-                }}
-                color={task.finishedState ? '#4CAF50' : undefined}
-              />
-            </View>
-          </TouchableOpacity>
+          />
         ))}
+      </View>
+      <View className="h-10" />
+    </ScrollView>
+  </View>
+  <View className="h-12" />
+
+{/* Partial Circle Background (60%) */}
+<View className="absolute top-[520px] left-0 right-0 items-center -z-10 ">
+<View className="w-[700px] h-[700px] rounded-t-[320px] bg-[#fff9e6]" />
+</View>
 
 
-        <Text className="text-4xl text-black font-bGarden mt-3 text-left px-6"> Notes</Text>
-        <View className="px-3">
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <View className="flex-row px-4 gap-x-4">
-              {notes.map((note) => {
-                return (
-                  <NoteButton
-                    key={note.id}
-                    name={note.title}
-                    description={note.content}
-                    onPress={() => {handleNotePress(note);
-                      setModalVisible(true);
-                    }}  // Pass the note's $id to the handler
-                  />
-                );
-              })}
-            </View>
-            <View className="h-10" />
-          </ScrollView>
+  <Text className="text-3xl text-[#204a35] font-bGarden mt-10 mb-2 px-6">Daily Tasks</Text>
+  <View className="bg-[#fff9e6] rounded-3xl p-4 mx-4">
+    {dailyTasks.map(task => (
+      <TouchableOpacity
+        key={task.id}
+        activeOpacity={0.8}
+        onPress={() => {
+          setSelectedTask(task);
+          setSelectedNote(null);
+          setSelectedEvent(null);
+          setModalVisible(true);
+        }}
+        className="mb-3"
+      >
+        <View className="bg-white flex-row items-center justify-between rounded-2xl px-4 py-3 shadow-md">
+          <View className="flex-1">
+            <Text className="text-base text-gray-800 font-medium">
+              {task.taskContent}
+            </Text>
+            <Text className={`text-sm font-medium ${task.finishedState ? "text-[#4CAF50]" : "text-[#F57C00]"}`}>
+              {task.finishedState ? "Completed" : "In Progress"}
+            </Text>
+          </View>
+
+          <Checkbox
+            value={task.finishedState}
+            onValueChange={async (newState) => {
+              await updateTask(task.id, { finishedState: newState });
+
+              if (newState === true) {
+                const companions = await fetchUserCompanions();
+                if (companions) {
+                  const companion = companions[0];
+                  const newExp = (companion.experience || 0) + task.expAmount;
+                  await updateCompanion(companion.id, { experience: newExp });
+                }
+              }
+
+              setDailyTasks(prev =>
+                prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+              );
+            }}
+            color={task.finishedState ? '#4CAF50' : undefined}
+          />
         </View>
+      </TouchableOpacity>
+    ))}
+  </View>
+
+  <Text className="text-3xl text-[#204a35] font-bGarden mt-6 mb-2 px-6">Weekly Tasks</Text>
+  <View className="bg-[#fff9e6] rounded-3xl p-4 mx-4 mb-12">
+    {weeklyTasks.map(task => (
+      <TouchableOpacity
+        key={task.id}
+        activeOpacity={0.8}
+        onPress={() => {
+          setSelectedTask(task);
+          setSelectedNote(null);
+          setSelectedEvent(null);
+          setModalVisible(true);
+        }}
+        className="mb-3"
+      >
+        <View className="bg-white flex-row items-center justify-between rounded-2xl px-4 py-3 shadow-md">
+          <View className="flex-1">
+            <Text className="text-base text-gray-800 font-medium">
+              {task.taskContent}
+            </Text>
+            <Text className={`text-sm font-medium ${task.finishedState ? "text-[#4CAF50]" : "text-[#F57C00]"}`}>
+              {task.finishedState ? "Completed" : "In Progress"}
+            </Text>
+          </View>
+
+          <Checkbox
+            value={task.finishedState}
+            onValueChange={async (newState) => {
+              await updateTask(task.id, { finishedState: newState });
+
+              if (newState === true) {
+                const companions = await fetchUserCompanions();
+                if (companions) {
+                  const companion = companions[0];
+                  const newExp = (companion.experience || 0) + task.expAmount;
+                  await updateCompanion(companion.id, { experience: newExp });
+                }
+              }
+
+              setWeeklyTasks(prev =>
+                prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
+              );
+            }}
+            color={task.finishedState ? '#4CAF50' : undefined}
+          />
+        </View>
+      </TouchableOpacity>
+    ))}
+  </View>
+
+
+        
 
         
 
@@ -318,12 +337,11 @@ const handleRefresh = async () => {
 
                       // Give EXP only if this is the first time completing it
                       const companions = await fetchUserCompanions();
-                      console.log("Companions fetched:", companions);
+                      
                       if (companions) {
                         const companion = companions[0];
                         const newExp = (companion.experience || 0) + selectedEvent.expAmount; // Adjust EXP logic as needed
                         await updateCompanion(companion.id, { experience: newExp });
-                        console.log("EXP to add:", selectedEvent.expAmount);
                       }
                     }
 
