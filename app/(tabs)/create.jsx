@@ -10,7 +10,6 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
     name: '',
     description: '',
     location: '',
-    finishedState: false,
     expAmount: 0,
   });
 
@@ -50,14 +49,13 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
   
     try {
       // Call createEvent from AuthProvider to save event
-      await createEvent(name, description, location, finishedState, expAmount);
+      await createEvent(name, description, location, expAmount);
   
       // Reset form after saving
       setEvent({
         name: '', 
         description: '', 
         location: '',   
-        finishedState: false,
         expAmount: 0,
       });
   

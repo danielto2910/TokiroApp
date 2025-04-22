@@ -13,7 +13,7 @@ import { useAuth } from '../../context/AuthProvider';
 const Task = () => {
 
   const [refreshing, setRefreshing] = useState(false);
-  const {updateNote, deleteNote, updateTask,updateCompanion,updateEvent, fetchUserTask,fetchUserNotes,fetchUserEvents,fetchUserCompanions} = useAuth();
+  const {user,updateNote, deleteNote, updateTask,updateCompanion,updateEvent, fetchUserTask,fetchUserNotes,fetchUserEvents,fetchUserCompanions} = useAuth();
   const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
   const [dailyTasks, setDailyTasks] = useState([]);
@@ -73,7 +73,7 @@ const handleRefresh = async () => {
                     name={event.name}
                     location={event.location}
                     description={event.description}
-                    finishedState={event.finishedState}
+                    finishedState={event.completedBy[user.uid]}
                     onPress={() => {
                       handleEventPress(event)
                       setSelectedNote(null); // just in case something was selected before
@@ -306,27 +306,35 @@ const handleRefresh = async () => {
                 <Text>{selectedEvent.description}</Text>
 
                 <View className="flex-row gap-x-4 mt-4">
-                  <Checkbox
-                value={selectedEvent.finishedState}
-                onValueChange={async (newState) => {
-                  await updateEvent(selectedEvent.id, { finishedState: newState });
-                
-                  if (newState === true) {
-                    const companions = await fetchUserCompanions();
-                    if (companions) {
-                      const companion = companions[0];
-                      const newExp = (companion.experience || 0) + selectedEvent.expAmount; // Adjust EXP logic as needed
-                      await updateCompanion(companion.id, { experience: newExp });
+                <Checkbox
+                  value={selectedEvent.completedBy[user.uid] || false}  // Check if the user has already completed the event
+                  onValueChange={async () => {
+                    const updatedCompletedBy = { ...selectedEvent.completedBy }; // Copy the completedBy object
+                    const alreadyCompleted = selectedEvent.completedBy?.[user.uid];
+
+                    if (!alreadyCompleted) {
+                      updatedCompletedBy[user.uid] = true; // Mark as complete
+                      await updateEvent(selectedEvent.id, { completedBy: updatedCompletedBy });
+
+                      // Give EXP only if this is the first time completing it
+                      const companions = await fetchUserCompanions();
+                      console.log("Companions fetched:", companions);
+                      if (companions) {
+                        const companion = companions[0];
+                        const newExp = (companion.experience || 0) + selectedEvent.expAmount; // Adjust EXP logic as needed
+                        await updateCompanion(companion.id, { experience: newExp });
+                        console.log("EXP to add:", selectedEvent.expAmount);
+                      }
                     }
-                  }
-                
-                  setSelectedEvent(prevEvent => ({
-                    ...prevEvent,
-                    finishedState: newState
-                  }));
-                }}
-                color={selectedEvent.finishedState ? '#4CAF50' : undefined}
-              />
+
+                    // Update local state with the new completedBy object
+                    setSelectedEvent(prevEvent => ({
+                      ...prevEvent,
+                      completedBy: updatedCompletedBy
+                    }));
+                  }}
+                  color={selectedEvent.completedBy[user.uid] ? '#4CAF50' : undefined}
+                />
                   <Button title="Close" onPress={() => {
                     setModalVisible(false);
                     setSelectedEvent(null);

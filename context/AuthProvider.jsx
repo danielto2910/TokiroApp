@@ -35,26 +35,25 @@ export const AuthProvider = ({ children }) => {
     
   };
 
-  const createEvent = async (eventName, eventDesc, eventLoc,finishedState, expAmount) => {
+  const createEvent = async (eventName, eventDesc, eventLoc, expAmount) => {
     const user = auth.currentUser;
-    try{
+    try {
+      // Creating the event with the new structure
       const eventRef = await addDoc(collection(firestoreDB, "events"), {
-        uid: user.uid,
+        uid: user.uid,  // The user ID of the creator
         name: eventName,
         description: eventDesc,
         location: eventLoc,
-        finishedState: finishedState,
         expAmount: expAmount,
-
+        completedBy: {},  // Empty object to track which users completed the event
         createdAt: new Date().toISOString(),
-      })
-
+      });
+  
       console.log("Event created with ID: ", eventRef.id);
-    }
-    catch (e) {
+    } catch (e) {
       console.error("Error adding document: ", e);
     }
-  }
+  };
 
   const createNotes = async (noteTitle, noteContent) => {
     const user = auth.currentUser;
