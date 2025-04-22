@@ -119,9 +119,8 @@ export default function HomeDashboard() {
         
       {companions.map((companion) => {
           // Initialize default values for missing data
-          const { level = 1, exp = 0 } = companion;  // Default level = 1, exp = 0
-          const { level: newLevel, exp: newExp, maxExp } = calculateLevelAndExp(exp, level);
-
+          const { level = 1, experience = 0 } = companion;  // Use 'experience' and 'level' from Firestore
+          const { level: newLevel, exp: newExp, maxExp } = calculateLevelAndExp(experience, level);
           return (
             <View key={companion.id} className="items-center">
               <Image source={images[companion.imageUrl]} className="w-24 h-24" />
