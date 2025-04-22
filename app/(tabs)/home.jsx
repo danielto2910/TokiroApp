@@ -4,14 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import { icons } from "../../constants";
 import { auth, firestoreDB } from "../../lib/firebaseConfig"; 
-import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, limit, updateDoc } from "firebase/firestore";
 import { useAuth } from "../../context/AuthProvider";
 
 
 export default function HomeDashboard() {
   const [isDaily, setIsDaily] = useState(true); // Track selection state
 
-  const {fetchUsername, fetchUserTask, fetchUserCompanions} = useAuth();
+  const {fetchUsername, fetchUserTask, fetchUserCompanions, updateCompanion} = useAuth();
   const dailyProgress = 70; // 70% completed for daily tasks
   const weeklyProgress = 40; // 40% completed for weekly tasks
   const taskProgress = isDaily ? dailyProgress : weeklyProgress; // Switches based on selection
@@ -38,13 +38,21 @@ export default function HomeDashboard() {
 
   };
 
-  const calculateLevelAndExp = (exp, level) => {
+
+  // Function to calculate level and experience, and return the updated values
+  const calculateLevelAndUpdate = (companion) => {
+    const { level = 1, experience = 0, id } = companion;
+    let newExp = experience;
+    let newLevel = level;
+
     let maxExp = 140 * level;  // Scale the max EXP by level
-    if (exp >= maxExp) {
-      level += 1;  // Increase level
-      exp = exp - maxExp; // Reset EXP to the remainder after leveling up
+    if (newExp >= maxExp) {
+      newLevel += 1;  // Increase level
+      newExp = newExp - maxExp; // Reset EXP to the remainder after leveling up
     }
-    return { level, exp, maxExp };
+    updateCompanion(id, { experience: newExp, level: newLevel });
+    // Return the new values so they can be used in the UI
+    return { newExp, newLevel, maxExp };
   };
 
   useEffect(() => {
@@ -118,10 +126,13 @@ export default function HomeDashboard() {
       <View className="items-center justify-center min-h-[40vh] mt-10">
         
       {companions.map((companion) => {
-          // Initialize default values for missing data
-          const { level = 1, experience = 0 } = companion;  // Use 'experience' and 'level' from Firestore
-          const { level: newLevel, exp: newExp, maxExp } = calculateLevelAndExp(experience, level);
-          return (
+// Calculate new level and experience based on the companion data
+        const { newExp, newLevel, maxExp } = calculateLevelAndUpdate(companion);
+
+        // Update Firestore with the new level and exp
+        
+
+            return (
             <View key={companion.id} className="items-center">
               <Image source={images[companion.imageUrl]} className="w-24 h-24" />
               <View className="w-full px-10 mt-4">
