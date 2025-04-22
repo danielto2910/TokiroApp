@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 
-const EventButton = ({ name, location, description, onPress }) => {
+const EventButton = ({ name, location, description, onPress, finishedState }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -28,6 +28,13 @@ const EventButton = ({ name, location, description, onPress }) => {
           {description}
         </Text>
       ) : null}
+
+      {/* Completion Status */}
+      <View className="mt-2">
+        <Text className={`text-xs text-center ${finishedState ? 'text-green-500' : 'text-red-500'}`}>
+          {finishedState ? 'Completed' : 'Incomplete'}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 };

@@ -27,8 +27,8 @@ const LandingPage = () => {
 
     try {
       await Promise.all([
-        ...dailyTasks.map(task => createTasks(task, 'daily', false)),
-        ...weeklyTasks.map(task => createTasks(task, 'weekly', false)),
+        ...dailyTasks.map(task => createTasks(task, 'daily', false,false)),
+        ...weeklyTasks.map(task => createTasks(task, 'weekly', false,false)),
       ]);
 
       Alert.alert('Tasks Saved', 'Welcome aboard!');

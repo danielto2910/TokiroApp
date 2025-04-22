@@ -9,7 +9,9 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
   const [event, setEvent] = useState({
     name: '',
     description: '',
-    location: ''
+    location: '',
+    finishedState: false,
+    expAmount: 0,
   });
 
   const [note, setNote] = useState({
@@ -38,20 +40,27 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
 
   // Handle saving event
   const handleSaveEvent = async () => {
-    const { name, description, location } = event;
-    if (!name || !location || !description) {
+    const { name, description, location, expAmount, finishedState } = event;
+    
+    // Check for missing fields including expAmount being 0
+    if (!name || !location || !description || expAmount === 0) {
       console.log('Please fill all fields');
       return;
     }
-
+  
     try {
       // Call createEvent from AuthProvider to save event
-      await createEvent(name, description, location);
-
+      await createEvent(name, description, location, finishedState, expAmount);
+  
       // Reset form after saving
-      setEvent({ name: '', description: '', location: '' });
-
-
+      setEvent({
+        name: '', 
+        description: '', 
+        location: '',   
+        finishedState: false,
+        expAmount: 0,
+      });
+  
       // Close the bottom sheet after saving
       bottomSheetRef.current?.close();
     } catch (error) {
@@ -139,6 +148,17 @@ const Create = forwardRef(({ onAddEvent }, ref) => {
                 style={styles.inputText}
                 value={event.description}
                 onChangeText={(value) => handleInputChange('description', value)}  // Use the new input handler
+              />
+            </View>
+
+            <Text style={styles.eventText}>Experience</Text>
+            <View style={styles.container}>
+              <TextInput
+                placeholder="Amount of EXP..."
+                style={styles.inputText}
+                keyboardType="numeric"
+                value={event.expAmount?.toString()}
+                onChangeText={(value) => handleInputChange('expAmount', parseInt(value) || 0)}
               />
             </View>
           </View>

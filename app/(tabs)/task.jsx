@@ -13,7 +13,7 @@ import { useAuth } from '../../context/AuthProvider';
 const Task = () => {
 
   const [refreshing, setRefreshing] = useState(false);
-  const {updateNote, deleteNote, updateTask} = useAuth();
+  const {updateNote, deleteNote, updateTask,updateCompanion,updateEvent, fetchUserTask,fetchUserNotes,fetchUserEvents,fetchUserCompanions} = useAuth();
   const [events, setEvents] = useState([]);  // Store multiple events
   const [notes, setNotes] = useState([]);
   const [dailyTasks, setDailyTasks] = useState([]);
@@ -23,91 +23,27 @@ const Task = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  const handleRefresh = async () => {
+const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUserEvents(), fetchUserNotes()],fetchUserTask("daily"),fetchUserTask("weekly"));
+    await loadData();
     setRefreshing(false);
   };
-  
-  const fetchUserEvents = async () => {
-    try {
-      const eventsRef = collection(firestoreDB, "events");
-      const querySnapshot = await getDocs(eventsRef); // Get all events
-      
-      const allEvents = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-  
-      setEvents(allEvents);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
+
+  const loadData = async () => {
+    const userNotes = await fetchUserNotes();
+    const events = await fetchUserEvents(); 
+    const userDailyTask = await fetchUserTask("daily");
+    const userWeeklyTask = await fetchUserTask("weekly");
+    setNotes(userNotes);
+    setEvents(events);
+    setDailyTasks(userDailyTask);
+    setWeeklyTasks(userWeeklyTask);
+
   };
 
-  const fetchUserTask = async (taskType) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.log("User not authenticated.");
-        return;
-      }
-  
-      const taskRef = collection(firestoreDB, "tasks");
-  
-      const maxLimit = taskType === "daily" ? 4 : taskType === "weekly" ? 2 : 10;
-  
-      const q = query(
-        taskRef,
-        where("uid", "==", user.uid),
-        where("type", "==", taskType),
-        limit(maxLimit)
-      );
-  
-      const querySnapshot = await getDocs(q);
-      const userTasksData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-  
-      if (taskType === "daily") {
-        setDailyTasks(userTasksData);
-      } else if (taskType === "weekly") {
-        setWeeklyTasks(userTasksData);
-      }
-    } catch (error) {
-      console.error("Error fetching user tasks:", error);
-    }
-  };
-
-  const fetchUserNotes = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.log("User not authenticated.");
-          return;
-        }
-  
-        // Fetch events created by the current user
-        const notesRef = collection(firestoreDB, "notes");
-        const q = query(notesRef, where("uid", "==", user.uid)); // Ensure uid is in the events
-        const querySnapshot = await getDocs(q);
-        const userNotesData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-    
-        setNotes(userNotesData);
-      } catch (error) {
-        console.error("Error fetching user events:", error);
-      }
-    };
   
   useEffect(() => {
-    fetchUserEvents();
-    fetchUserNotes();
-    fetchUserTask("daily"); // Fetch daily tasks
-    fetchUserTask("weekly"); // Fetch weekly tasks
+    loadData();
   }, []);
 
   
@@ -137,6 +73,7 @@ const Task = () => {
                     name={event.name}
                     location={event.location}
                     description={event.description}
+                    finishedState={event.finishedState}
                     onPress={() => {
                       handleEventPress(event)
                       setSelectedNote(null); // just in case something was selected before
@@ -173,6 +110,16 @@ const Task = () => {
                 value={task.finishedState}
                 onValueChange={async (newState) => {
                   await updateTask(task.id, { finishedState: newState });
+                
+                  if (newState === true) {
+                    const companions = await fetchUserCompanions();
+                    if (companions) {
+                      const companion = companions[0];
+                      const newExp = (companion.experience || 0) + task.expAmount; // Adjust EXP logic as needed
+                      await updateCompanion(companion.id, { experience: newExp });
+                    }
+                  }
+                
                   setDailyTasks(prev =>
                     prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
                   );
@@ -207,7 +154,17 @@ const Task = () => {
                 value={task.finishedState}
                 onValueChange={async (newState) => {
                   await updateTask(task.id, { finishedState: newState });
-                  setDailyTasks(prev =>
+                
+                  if (newState === true) {
+                    const companions = await fetchUserCompanions();
+                    if (companions) {
+                      const companion = companions[0];
+                      const newExp = (companion.experience || 0) + task.expAmount; // Adjust EXP logic as needed
+                      await updateCompanion(companion.id, { experience: newExp });
+                    }
+                  }
+                
+                  setWeeklyTasks(prev =>
                     prev.map(t => t.id === task.id ? { ...t, finishedState: newState } : t)
                   );
                 }}
@@ -251,6 +208,7 @@ const Task = () => {
             setSelectedNote(null);
             setSelectedEvent(null);
           }}
+          key={selectedEvent ? selectedEvent.id : selectedNote ? selectedNote.id : ''}
         >
           <View className="flex-1 justify-center items-center bg-black/50">
             <View className="w-4/5 bg-white p-5 rounded-xl items-center">
@@ -348,6 +306,27 @@ const Task = () => {
                 <Text>{selectedEvent.description}</Text>
 
                 <View className="flex-row gap-x-4 mt-4">
+                  <Checkbox
+                value={selectedEvent.finishedState}
+                onValueChange={async (newState) => {
+                  await updateEvent(selectedEvent.id, { finishedState: newState });
+                
+                  if (newState === true) {
+                    const companions = await fetchUserCompanions();
+                    if (companions) {
+                      const companion = companions[0];
+                      const newExp = (companion.experience || 0) + selectedEvent.expAmount; // Adjust EXP logic as needed
+                      await updateCompanion(companion.id, { experience: newExp });
+                    }
+                  }
+                
+                  setSelectedEvent(prevEvent => ({
+                    ...prevEvent,
+                    finishedState: newState
+                  }));
+                }}
+                color={selectedEvent.finishedState ? '#4CAF50' : undefined}
+              />
                   <Button title="Close" onPress={() => {
                     setModalVisible(false);
                     setSelectedEvent(null);

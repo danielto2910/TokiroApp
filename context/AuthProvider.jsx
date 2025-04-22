@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { addDoc, collection, doc, setDoc, updateDoc,query, deleteDoc, where, getDocs } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc, updateDoc,query, deleteDoc, where, getDocs,getDoc,limit } from 'firebase/firestore';
 import { auth, firestoreDB } from '../lib/firebaseConfig';
 
 const AuthContext = createContext();
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     
   };
 
-  const createEvent = async (eventName, eventDesc, eventLoc, expGained, expAmount) => {
+  const createEvent = async (eventName, eventDesc, eventLoc,finishedState, expAmount) => {
     const user = auth.currentUser;
     try{
       const eventRef = await addDoc(collection(firestoreDB, "events"), {
@@ -43,6 +43,9 @@ export const AuthProvider = ({ children }) => {
         name: eventName,
         description: eventDesc,
         location: eventLoc,
+        finishedState: finishedState,
+        expAmount: expAmount,
+
         createdAt: new Date().toISOString(),
       })
 
@@ -199,12 +202,117 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUserCompanions = async () => {
+    const user = auth.currentUser;
+    if (!user) return [];
+  
+    const companionQuery = query(
+      collection(firestoreDB, 'companions'),
+      where('uid', '==', user.uid)
+    );
+  
+    const snapshot = await getDocs(companionQuery);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  };
+
   const logout = async () => {
     await signOut(auth);
   };
 
+
+  const fetchUserTask = async (taskType) => {
+    const user = auth.currentUser;
+    console.log(`[fetchUserTask] Starting for type: ${taskType}`);
+  
+    if (!user) {
+      console.log("[fetchUserTask] User not authenticated.");
+      return [];
+    }
+  
+    console.log(`[fetchUserTask] User UID: ${user.uid}`);
+  
+    let taskRef;
+    try {
+      taskRef = collection(firestoreDB, "tasks");
+      console.log("[fetchUserTask] Collection reference created.");
+    } catch (e) {
+      console.log("[fetchUserTask] Failed to get task collection:", e);
+      return [];
+    }
+  
+    const maxLimit = taskType === "daily" ? 4 : taskType === "weekly" ? 2 : 10;
+    
+    let q;
+    try {
+      q = query(
+        taskRef,
+        where("uid", "==", user.uid),
+        where("type", "==", taskType),
+        limit(maxLimit)
+      );
+      console.log("[fetchUserTask] Firestore query created.");
+    } catch (e) {
+      console.log("[fetchUserTask] Failed to create query:", e);
+      return [];
+    }
+  
+    try {
+      console.log(`[fetchUserTask] Fetching ${taskType} tasks from Firestore...`);
+      const querySnapshot = await getDocs(q);
+      console.log(`[fetchUserTask] Got ${querySnapshot.size} tasks for ${taskType}`);
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error(`[fetchUserTask] Error fetching ${taskType} tasks:`, error);
+      return [];
+    }
+  };
+  
+  
+
+  const fetchUserNotes = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.log("User not authenticated.");
+      return [];
+    }
+  
+    const notesRef = collection(firestoreDB, "notes");
+    const q = query(notesRef, where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+  
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  };
+
+  const fetchUsername = async () => {
+    const user = auth.currentUser;
+    if (!user) return null;
+  
+    const docRef = doc(firestoreDB, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+  
+    if (docSnap.exists()) {
+      return docSnap.data().username || "Adventurer";
+    } else {
+      console.log("No such user document!");
+      return "Adventurer";
+    }
+  };
+
+  const fetchUserEvents = async () => {
+    const eventsRef = collection(firestoreDB, "events");
+    const querySnapshot = await getDocs(eventsRef);
+  
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, createCompanion, updateCompanion, loading, signIn,createEvent, createNotes, createTasks, updateTask, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
+    <AuthContext.Provider value={{ user,fetchUsername, fetchUserCompanions,fetchUserTask,fetchUserNotes,fetchUserEvents, createCompanion, updateCompanion, loading, signIn,createEvent, createNotes, createTasks, updateTask, deleteNote, updateNote, deleteEvent, updateEvent, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );
