@@ -1,6 +1,5 @@
-// app/landing.js
-import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthProvider';
 
@@ -27,12 +26,12 @@ const LandingPage = () => {
 
     try {
       await Promise.all([
-        ...dailyTasks.map(task => createTasks(task, 'daily', false,false)),
-        ...weeklyTasks.map(task => createTasks(task, 'weekly', false,false)),
+        ...dailyTasks.map(task => createTasks(task, 'daily', false, false)),
+        ...weeklyTasks.map(task => createTasks(task, 'weekly', false, false)),
       ]);
 
       Alert.alert('Tasks Saved', 'Welcome aboard!');
-      router.push('/home'); // Replace with main screen, e.g. /home or /tasks
+      router.push('/home');
     } catch (error) {
       console.error('Task submission failed:', error);
     }
@@ -40,26 +39,41 @@ const LandingPage = () => {
 
   const renderInputs = (count, type) => (
     <>
-      <Text className="font-bold text-lg mt-4 mb-2">{type === 'daily' ? 'Daily Tasks' : 'Weekly Tasks'}</Text>
+      <Text className="font-psemibold text-lg mt-4 mb-2 text-[#004225]">
+        {type === 'daily' ? 'Daily Tasks' : 'Weekly Tasks'}
+      </Text>
       {Array.from({ length: count }, (_, i) => (
         <TextInput
           key={i}
           value={type === 'daily' ? dailyTasks[i] : weeklyTasks[i]}
           onChangeText={text => handleChange(type, i, text)}
           placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} Task ${i + 1}`}
-          className="border border-gray-300 p-3 rounded-lg mb-2"
+          placeholderTextColor="#999"
+          className="bg-[#fff5d5] text-[#004225] border border-[#FFD79B] p-3 rounded-lg mb-3 font-pregular"
         />
       ))}
     </>
   );
 
   return (
-    <View className="flex-1 px-6 py-10 bg-white">
-      <Text className="text-2xl font-bold mb-6 text-center">Welcome! Set Your Tasks</Text>
+    <ScrollView className="flex-1 px-6 py-10 bg-[#DFF5CC]">
+      <Text className="text-3xl font-bGarden text-center text-[#004225] mb-6">
+        Welcome! Set Your Tasks
+      </Text>
       {renderInputs(4, 'daily')}
       {renderInputs(2, 'weekly')}
-      <Button title="Submit Tasks" onPress={handleSubmit} />
-    </View>
+      <View className="mt-6">
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={dailyTasks.some(task => task.trim() === '') || weeklyTasks.some(task => task.trim() === '')}
+          className={`py-4 rounded-xl ${dailyTasks.every(task => task.trim() !== '') && weeklyTasks.every(task => task.trim() !== '') ? 'bg-[#FFD79B]' : 'bg-[#FFD79B]/50'}`}
+        >
+          <Text className="text-white text-center text-lg font-bold">
+            Submit Tasks
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 

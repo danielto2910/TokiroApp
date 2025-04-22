@@ -1,21 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context';
-import React from 'react'
-
-const Shop = () => {
+import React from "react";
+import { View, Text, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { images } from "../../constants";
+export default function ShopComingSoon() {
   return (
-    <SafeAreaView className="flex-1 bg-[#DFF5CC]">
-      <View className="flex-1 justify-start px-5 mt-3">
-        <Text className="text-4xl text-black font-bGarden mt-3"> Shop</Text>
-        <View className="border-2 border-secondary-700 w-full  h-60 bg-[#f5efcc] rounded-3xl  items-center">
-          
-        </View>
+    <SafeAreaView className="flex-1 bg-[#DFF5CC] items-center justify-center px-6">
+      <View className="bg-[#fcedd7] p-6 rounded-3xl items-center shadow-lg">
         
+        <Text className="text-[#204a35] text-5xl font-bGarden mb-2">Shop Coming Soon!</Text>
+        <Text className="text-[#5A4031] text-center font-bGarden text-2xl">
+          Stay tuned for adorable companions, stylish cosmetics, and other surprises!
+        </Text>
       </View>
     </SafeAreaView>
-  )
+  );
 }
-
-export default Shop
-
-const styles = StyleSheet.create({})

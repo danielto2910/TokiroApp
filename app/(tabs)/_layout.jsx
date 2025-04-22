@@ -11,14 +11,14 @@ import Create from './create';
 const TabIcon = ({ icon, color, name, focused }) => {
   const { height } = useWindowDimensions();
   return (
-    <View style={{ marginTop: height * 0.03 }} className="items-center justify-center gap-1">
+    <View style={{ marginTop: height * 0.04 }} className="items-center justify-center gap-1">
       <Image 
         source={icon}
         resizeMode='contain'
         tintColor={color}
         className="w-6 h-6"
       />
-      <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`} numberOfLines={1} adjustsFontSizeToFit style={{ color: color }}>
+      <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-s`} numberOfLines={1} adjustsFontSizeToFit style={{ color: color }}>
         {name}
       </Text>
     </View>
@@ -35,16 +35,15 @@ const TabLayout = () => {
   return (
     <>
       <GestureHandlerRootView style={styles.container}>
-        <Tabs screenOptions={{
-          tabBarShowLabel: false,
-          tabBarActiveTintColor: '#BFFFC8', // Primary color for active tab
-          tabBarInactiveTintColor: '#2A5B42', // Secondary text green for inactive tabs
-          tabBarStyle: {
-            backgroundColor: "#fcedd7", 
-            height: 85,
-
-          },
-        }}>
+      <Tabs screenOptions={{
+  tabBarShowLabel: false,
+  tabBarActiveTintColor: '#F1CE63',
+  tabBarInactiveTintColor: '#68C782',
+  tabBarStyle: {
+    backgroundColor: '#fff9e6',  // dimmer pastel cream
+    height: 80,
+  },
+}}>
           <Tabs.Screen
             name='home'
             options={{

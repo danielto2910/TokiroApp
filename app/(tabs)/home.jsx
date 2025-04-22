@@ -28,29 +28,27 @@ export default function HomeDashboard() {
     const userDailyTask = await fetchUserTask("daily");
     const userWeeklyTask = await fetchUserTask("weekly");
     const userName = await fetchUsername();
-    const companion = await fetchUserCompanions();
+    const companionData = await fetchUserCompanions();
+  
+    const updatedCompanions = await Promise.all(companionData.map(async (companion) => {
+      const { level = 1, experience = 0, id } = companion;
+      const maxExp = 140 * level;
+      
+      if (experience >= maxExp) {
+        const newLevel = level + 1;
+        const newExp = experience - maxExp;
+  
+        await updateCompanion(id, { level: newLevel, experience: newExp });
+  
+        return { ...companion, level: newLevel, experience: newExp };
+      }
+      return companion;
+    }));
+  
     setDailyTasks(userDailyTask);
     setWeeklyTasks(userWeeklyTask);
     setUsername(userName);
-    setCompanions(companion);
-
-  };
-
-
-  // Function to calculate level and experience, and return the updated values
-  const calculateLevelAndUpdate = (companion) => {
-    const { level = 1, experience = 0, id } = companion;
-    let newExp = experience;
-    let newLevel = level;
-
-    let maxExp = 140 * level;  // Scale the max EXP by level
-    if (newExp >= maxExp) {
-      newLevel += 1;  // Increase level
-      newExp = newExp - maxExp; // Reset EXP to the remainder after leveling up
-    }
-    updateCompanion(id, { experience: newExp, level: newLevel });
-    // Return the new values so they can be used in the UI
-    return { newExp, newLevel, maxExp };
+    setCompanions(updatedCompanions);
   };
 
   useEffect(() => {
@@ -81,34 +79,31 @@ export default function HomeDashboard() {
 
     {/* Companion Section */}
     {companions.map((companion) => {
-      const { newExp, newLevel, maxExp } = calculateLevelAndUpdate(companion);
+  const { id, level = 1, experience = 0 } = companion;
+  const maxExp = 140 * level;
 
-      return (
-        <View key={companion.id} className="items-center">
-          <Image
-            source={images[companion.imageUrl]}
-            style={{ width: 250, height: 250 }}
-            className="rounded-full mt-5"
-          />
-          <View className="w-full px-10">
-            <View className="flex-row justify-between">
-              <Text className="text-[#204a35] font-bGarden text-xl">Lvl: {newLevel}</Text>
-              <Text className="text-[#204a35] font-bGarden text-xl">Exp: {newExp}/{maxExp}</Text>
-            </View>
-            <View className="h-4 bg-[#E6E6E6] rounded-full overflow-hidden mt-2">
-              <View
-                className="h-4 bg-[#91E39F] rounded-full"
-                style={{ width: `${Math.min((newExp / maxExp) * 100, 100)}%` }}
-              />
-            </View>
-          </View>
+  return (
+    <View key={id} className="items-center">
+      <Image source={images[companion.imageUrl]} style={{ width: 250, height: 250 }} className="rounded-full mt-5" />
+      <View className="w-full px-10">
+        <View className="flex-row justify-between">
+          <Text className="text-[#204a35] font-bGarden text-xl">Lvl: {level}</Text>
+          <Text className="text-[#204a35] font-bGarden text-xl">Exp: {experience}/{maxExp}</Text>
         </View>
-      );
-    })}
+        <View className="h-4 bg-[#E6E6E6] rounded-full overflow-hidden mt-2">
+          <View
+            className="h-4 bg-[#91E39F] rounded-full"
+            style={{ width: `${Math.min((experience / maxExp) * 100, 100)}%` }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+})}
 
     {/* Tasks Section */}
     <View className="mt-8 px-3">
-      <View className="bg-[#FFF8E1] p-4 rounded-3xl shadow-lg">
+      <View className="bg-[#FFF8E1] p-4 rounded-t-3xl shadow-lg">
         <Text className="text-[#1F3A3D] text-xl font-bold mb-2">Tasks</Text>
 
         <View className="bg-[#fcedd7] rounded-3xl p-4 shadow-lg">

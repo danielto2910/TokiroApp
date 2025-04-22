@@ -6,4 +6,5 @@ import dog from "../assets/images/companion-dog.png"
 import aquaCat from "../assets/images/aquaCat.png"
 import flameFox from "../assets/images/flameFox.png"
 import terraTurtle from "../assets/images/terraTurtle.png"
-export default { logo, platform, dog, darkPlatform, aquaCat, flameFox,terraTurtle};
+import comingSoon from "../assets/images/coming-soon.png"
+export default { logo, platform, dog, darkPlatform, aquaCat, flameFox,terraTurtle, comingSoon};
