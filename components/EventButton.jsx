@@ -6,7 +6,7 @@ const EventButton = ({ name, location, description, onPress, finishedState, exp 
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="w-[130px] h-[180px] bg-[#f9f5dd] rounded-3xl border-2 border-[#fddfb3] items-center p-2 shadow-lg relative"
+      className="w-[150px] h-[200px] bg-[#f9f5dd] rounded-3xl border-2 border-[#fddfb3] items-center p-2 shadow-lg relative"
     >
       <View className="flex-1 w-full bg-[#FFF8E1] rounded-2xl p-2 ">
         {/* Event Name */}
@@ -14,14 +14,16 @@ const EventButton = ({ name, location, description, onPress, finishedState, exp 
 
         {/* Location */}
         {location ? (
-          <Text className="text-base text-[#204a35] text-center mt-1">{location}</Text>
+          <Text 
+          numberOfLines={1}
+          className="text-base text-[#204a35] text-center mt-1 italic">{location}</Text>
         ) : null}
 
         {/* Description */}
         {description ? (
           <Text
             className="text-base text-[#204a35] text-center mt-2"
-            numberOfLines={3}
+            numberOfLines={2}
             ellipsizeMode="tail"
           >
             {description}
@@ -30,7 +32,7 @@ const EventButton = ({ name, location, description, onPress, finishedState, exp 
 
         {/* Completion Status */}
         <View className="mt-2">
-          <Text className={`text-xs text-center ${finishedState ? 'text-green-500' : 'text-red-500'}`}>
+          <Text className={`text-s text-center font-extrabold ${finishedState ? 'text-green-500' : 'text-red-500'}`}>
             {finishedState ? 'Completed' : 'Incomplete'}
           </Text>
         </View>
