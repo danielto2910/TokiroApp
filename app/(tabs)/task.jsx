@@ -23,6 +23,21 @@ const Task = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskView, setTaskView] = useState('daily');
+  const defaultEvent = {
+    id: "default-event",
+    name: "Create your Event",
+    location: "Add a location",
+    description: "Tap here to create a new event to remember!",
+    completedBy: { [user.uid]: false },
+    exp: 0,
+  };
+  
+
+  const defaultNote = {
+    title: "Create your Note",
+    content: "Create your note here to make it something worth while!",
+    id: "default-note"
+  };
 
 const handleRefresh = async () => {
     setRefreshing(true);
@@ -44,13 +59,19 @@ const handleRefresh = async () => {
 
   
   useEffect(() => {
+    
     loadData();
+    if (selectedEvent) {
+      console.log("Selected Event EXP value:", selectedEvent.name); // or selectedEvent.expAmount if that's what you're using
+    }
   }, []);
 
   
 
   const handleEventPress = (event) => {
+    console.log("Selected Event:", event);
     setSelectedEvent(event);
+    
   };
 
   const handleNotePress = (note) => {
@@ -69,19 +90,34 @@ const handleRefresh = async () => {
   <View className="h-60">
     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
       <View className="flex-row px-4 pb-4 gap-x-4">
+      <EventButton
+        key={defaultEvent.id}
+        name={defaultEvent.name}
+        location={defaultEvent.location}
+        description={defaultEvent.description}
+        finishedState={defaultEvent.completedBy[user.uid]}
+        exp={defaultEvent.expAmount}
+        onPress={() => {
+          handleEventPress(defaultEvent);
+          setSelectedNote(null);
+          setModalVisible(true);
+        }}
+      />
         {events.map((event) => (
+          
           <EventButton
             key={event.id}
             name={event.name}
             location={event.location}
             description={event.description}
             finishedState={event.completedBy[user.uid]}
-            exp={event.exp}
+            exp={event.expAmount}
             onPress={() => {
               handleEventPress(event);
               setSelectedNote(null);
               setModalVisible(true);
             }}
+            
           />
         ))}
       </View>
@@ -92,6 +128,14 @@ const handleRefresh = async () => {
   <View className="px-3">
     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
       <View className="flex-row px-4 pb-4 gap-x-4">
+      <NoteButton
+        name={defaultNote.title}
+        description={defaultNote.content}
+        onPress={() => {
+          handleNotePress(defaultNote);
+          setModalVisible(true);
+        }}
+      />
         {notes.map((note) => (
           <NoteButton
             key={note.id}
@@ -352,8 +396,9 @@ const handleRefresh = async () => {
       {selectedEvent && (
         <>
         <View className="absolute top-2 right-2 bg-[#dff5cc] px-2 py-1 mt-3 rounded-full">
-            <Text className="text-[30px] font-bold text-[#004225]">{selectedEvent.exp} EXP</Text>
+            <Text className="text-[15px] font-bold text-[#004225]">{selectedEvent.expAmount} EXP</Text>
           </View>
+          
 
           <Text className="text-2xl text-[#204a35] font-bGardenBold">Event Location:</Text>
           <Text className="text-[#204a35]">{selectedEvent.location}</Text>

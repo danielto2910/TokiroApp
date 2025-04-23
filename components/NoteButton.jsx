@@ -18,7 +18,7 @@ const NoteButton = ({ name, description, onPress}) => {
       {description ? (
         <Text
           className="text-base text-[#004225] text-center mt-2"
-          numberOfLines={5}
+          numberOfLines={4}
           ellipsizeMode="tail"
         >
           {description}
