@@ -2,7 +2,7 @@
 <!-- This section is where you will replace the link to your transparent logo, the title of your project, and the very short desciptor of your project -->
 <!-- If you used Canva to make your icon and don't want to pay for a background remover, you can use the website https://www.remove.bg/ to do so -->
 <p align="center">
-  <img alt="pizza heist logo" src="media/logos/PizzaHeistLogoTransparentOutline.png" width="" height="500" />
+  <img alt="tokiro logo" src="assests/images/TokrioLogo" width="" height="500" />
   <h1 align="center">Tokrio: A Gamified Productivity App</h1>
   <p align="center">Experience and enhance your productivity with your trusty companion using Tokiro.</p>
 </p>
