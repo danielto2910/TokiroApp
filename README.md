@@ -25,6 +25,7 @@ Tokiro helps you manage tasks, stay on schedule, and grow alongside your own vir
 <!-- ### Commercial Video-->
 
 ### Screenshots
+<img src="assets/images/screenshotApp.gif"/>
 
 ### Technology stack
 - **React Native w/ Expo**
