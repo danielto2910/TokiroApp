@@ -85,7 +85,8 @@ npx expo start -c
 ```
 
 ## :video_game: User Manual
-User Manual: [Tokiro_UserManual_2025v1.pdf](https://github.com/user-attachments/files/19968030/Tokiro_UserManual_2025v1.pdf)
+Read PDF: [Tokiro UserManual](media/Tokiro_UserManual_2025v1.pdf)
+Download PDF: [Tokiro_UserManual_2025v1.pdf](https://github.com/user-attachments/files/19968030/Tokiro_UserManual_2025v1.pdf)
 
 
 ## 🔓 License
